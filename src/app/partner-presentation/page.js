@@ -30,8 +30,9 @@ export default function PartnerPresentation() {
           </h1>
 
           <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium max-w-2xl mx-auto">
-            Hur Famies hjälper familjer hitta nästa upplevelse, och hur du
-            kan vara en del av det.
+            Hur Famies hjälper familjer hitta nästa upplevelse,
+            <br className="hidden md:block" />{' '}
+            och hur du kan vara en del av det.
           </p>
         </motion.div>
       </section>
@@ -73,6 +74,7 @@ export default function PartnerPresentation() {
           </h2>
           <p className="text-base md:text-lg text-ink-500 dark:text-ink-300 mb-7 font-medium">
             Vi pratar gärna med kommuner, arrangörer och varumärken som
+            <br className="hidden md:block" />{' '}
             vill nå familjer på ett relevant sätt.
           </p>
 
