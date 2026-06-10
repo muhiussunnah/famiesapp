@@ -99,11 +99,11 @@ export default function ComingSoon() {
           transition={{ duration: 0.85, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="text-center font-black leading-[1.05] tracking-tight"
         >
-          <span className="block text-[2.6rem] sm:text-6xl md:text-7xl text-white">
-            Less screen time.
+          <span className="block text-[2.4rem] sm:text-5xl md:text-6xl text-white">
+            Där familjer hittar
           </span>
-          <span className="block text-[2.6rem] sm:text-6xl md:text-7xl mt-1 sm:mt-2 text-[#FF8FAF]">
-            More Real time.
+          <span className="block text-[2.4rem] sm:text-5xl md:text-6xl mt-1 sm:mt-2 text-[#FF8FAF]">
+            nästa upplevelse.
           </span>
         </motion.h1>
 
@@ -113,9 +113,7 @@ export default function ComingSoon() {
           transition={{ duration: 0.7, delay: 0.35 }}
           className="mt-7 sm:mt-9 max-w-md text-center text-base sm:text-lg text-white/70 leading-relaxed font-medium"
         >
-          Familjeappen som hjälper er att spendera mer tid tillsammans.
-          <br className="hidden sm:block" />
-          Bortom skärmarna.
+          Hitta aktiviteter, event och andra familjer i närheten.
         </motion.p>
 
         <motion.div
