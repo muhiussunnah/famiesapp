@@ -72,8 +72,8 @@ export default function PartnerPresentation() {
             Vill ni vara med och bygga något bra för familjer?
           </h2>
           <p className="text-base md:text-lg text-ink-500 dark:text-ink-300 mb-7 font-medium">
-            Vi pratar gärna med kommuner, kulturinstitutioner, arrangörer
-            och varumärken som vill nå familjer på ett ärligt sätt.
+            Vi pratar gärna med kommuner, arrangörer och varumärken som
+            vill nå familjer på ett relevant sätt.
           </p>
 
           <a
