@@ -44,20 +44,20 @@ const satoshi = localFont({
 export const metadata = {
   metadataBase: new URL('https://www.famies.app'),
   title: {
-    default: 'Famies — Familjeaktiviteter nära dig',
+    default: 'Famies – Familjeaktiviteter nära dig',
     template: '%s · Famies',
   },
   description:
-    'Famies visar tips, evenemang och familjeaktiviteter nära dig, smart utvalda så ni slipper googla. Byggd av föräldrar, för föräldrar. 10 000+ familjer använder Famies.',
+    'Vad tipsar andra familjer nära dig om? Upptäck aktiviteter, event och nya favoriter. 💛',
   keywords: [
     'familjeapp', 'aktiviteter för barn', 'familjeevenemang Stockholm',
     'vad göra med barn', 'utflykter barn', 'familjeliv', 'föräldra-app', 'Famies',
   ],
   icons: { icon: '/logo-black.webp', apple: '/logo-black.webp' },
   openGraph: {
-    title: 'Famies — Familjeaktiviteter nära dig',
+    title: 'Famies – Familjeaktiviteter nära dig',
     description:
-      'Utvalda tips, evenemang och familjeaktiviteter nära dig. 10 000+ föräldrar använder redan Famies.',
+      'Vad tipsar andra familjer nära dig om? Upptäck aktiviteter, event och nya favoriter. 💛',
     url: 'https://www.famies.app',
     siteName: 'Famies',
     locale: 'sv_SE',
@@ -66,9 +66,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Famies — Familjeaktiviteter nära dig',
+    title: 'Famies – Familjeaktiviteter nära dig',
     description:
-      'Utvalda tips och evenemang för familjer, nära dig. 10 000+ föräldrar använder Famies.',
+      'Vad tipsar andra familjer nära dig om? Upptäck aktiviteter, event och nya favoriter. 💛',
     images: ['/logo-black.webp'],
   },
 };
