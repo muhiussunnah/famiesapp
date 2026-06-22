@@ -21,6 +21,9 @@ import {
   Lock,
   UserCircle,
   Briefcase,
+  CalendarDays,
+  Plus,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -47,6 +50,10 @@ export default function SkapaEvent() {
     sourceLink: '',
   });
 
+  // Event dates — one or more date ranges. Each range = { start, end }.
+  // Same start and end means a single-day event; different = multi-day.
+  const [dateRanges, setDateRanges] = useState([{ start: '', end: '' }]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -61,6 +68,32 @@ export default function SkapaEvent() {
   };
 
   const showOrganization = formData.personType && formData.personType !== 'Privatperson';
+
+  // Date range helpers
+  const addDateRange = () =>
+    setDateRanges((prev) => [...prev, { start: '', end: '' }]);
+  const removeDateRange = (i) =>
+    setDateRanges((prev) => prev.filter((_, idx) => idx !== i));
+  const updateDateRange = (i, key, value) =>
+    setDateRanges((prev) => {
+      const next = [...prev];
+      next[i] = { ...next[i], [key]: value };
+      // Auto-fill end if user sets start and end is empty
+      if (key === 'start' && !next[i].end) next[i].end = value;
+      return next;
+    });
+
+  // Format date ranges into a single human-readable string for the Sheet.
+  // Single day: "2026-06-22"
+  // Multi-day:  "2026-06-22 → 2026-06-24"
+  // Multiple ranges separated by " · "
+  const formatDateRanges = () =>
+    dateRanges
+      .filter((r) => r.start)
+      .map((r) =>
+        r.end && r.end !== r.start ? `${r.start} → ${r.end}` : r.start
+      )
+      .join(' · ');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,6 +113,7 @@ export default function SkapaEvent() {
       organization: formData.organization,
       contact: formData.contact,
       age_range: formData.ageRange,
+      event_dates: formatDateRanges(),
     };
 
     const showSuccessToast = () =>
@@ -108,6 +142,7 @@ export default function SkapaEvent() {
         city: '',
         sourceLink: '',
       });
+      setDateRanges([{ start: '', end: '' }]);
     };
 
     try {
@@ -364,6 +399,90 @@ export default function SkapaEvent() {
                       className="w-full bg-white/70 dark:bg-ink-100/5 border border-ink-100/70 dark:border-ink-700/50 rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all resize-none text-ink-900 dark:text-white placeholder:text-ink-300"
                     />
                   </div>
+                </div>
+
+                {/* Date ranges */}
+                <div className="space-y-2.5">
+                  <label className="text-sm font-bold text-ink-700 dark:text-ink-100 ml-1 flex items-center gap-2">
+                    <CalendarDays size={16} className="text-primary" />
+                    När händer eventet?
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-500 dark:text-ink-300 bg-ink-100 dark:bg-ink-700/50 px-2 py-0.5 rounded-full">
+                      en eller flera dagar
+                    </span>
+                  </label>
+
+                  <AnimatePresence initial={false}>
+                    {dateRanges.map((range, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <div className="bg-white/70 dark:bg-ink-100/5 border border-ink-100/70 dark:border-ink-700/50 rounded-2xl p-3 grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr_auto] gap-2 items-center">
+                          <div className="relative">
+                            <span className="absolute -top-1.5 left-3 text-[10px] font-bold uppercase tracking-wider text-ink-500 dark:text-ink-300 bg-white dark:bg-ink-900 px-1.5 rounded">
+                              Start
+                            </span>
+                            <input
+                              type="date"
+                              value={range.start}
+                              required={i === 0}
+                              onChange={(e) =>
+                                updateDateRange(i, 'start', e.target.value)
+                              }
+                              className="w-full bg-transparent text-ink-900 dark:text-white px-3 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                            />
+                          </div>
+
+                          <span className="hidden sm:flex items-center justify-center text-ink-300 px-1">
+                            →
+                          </span>
+
+                          <div className="relative">
+                            <span className="absolute -top-1.5 left-3 text-[10px] font-bold uppercase tracking-wider text-ink-500 dark:text-ink-300 bg-white dark:bg-ink-900 px-1.5 rounded">
+                              Slut
+                            </span>
+                            <input
+                              type="date"
+                              value={range.end}
+                              required={i === 0}
+                              min={range.start || undefined}
+                              onChange={(e) =>
+                                updateDateRange(i, 'end', e.target.value)
+                              }
+                              className="w-full bg-transparent text-ink-900 dark:text-white px-3 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                            />
+                          </div>
+
+                          {dateRanges.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeDateRange(i)}
+                              aria-label="Ta bort datum"
+                              className="press w-10 h-10 flex items-center justify-center rounded-xl text-ink-500 hover:text-primary hover:bg-primary/10 transition-all"
+                            >
+                              <X size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  <button
+                    type="button"
+                    onClick={addDateRange}
+                    className="press w-full py-3 rounded-2xl bg-secondary/40 hover:bg-secondary/60 text-green-800 font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Plus size={16} /> Lägg till fler datum
+                  </button>
+                  <p className="text-xs text-ink-500 dark:text-ink-300 ml-1">
+                    Samma start- och slutdatum = endagsevent. Olika datum =
+                    flerdagsevent.
+                  </p>
                 </div>
 
                 <FormField
