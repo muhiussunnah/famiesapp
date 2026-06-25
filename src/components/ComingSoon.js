@@ -9,11 +9,9 @@ import { motion } from 'framer-motion';
  * Pink (#FF8FAF) + Mint (#CCFAD6) accents only.
  */
 
-// Replace the placeholder hrefs once the apps are listed on the
-// respective stores. Keeping them inert (#) prevents broken-link
-// pages from confusing pre-launch visitors.
-const GOOGLE_PLAY_URL = '#';
-const APP_STORE_URL = '#';
+const GOOGLE_PLAY_URL =
+  'https://play.google.com/store/apps/details?id=com.famapdirectory.apps';
+const APP_STORE_URL = 'https://apps.apple.com/se/app/fam-map/id6450005701';
 
 function GooglePlayIcon({ className }) {
   return (
@@ -81,6 +79,8 @@ function StoreBadge({ href, label, store, icon }) {
   return (
     <a
       href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       aria-label={`${label} ${store}`}
       className="press group flex items-center gap-3 px-5 py-3 rounded-2xl bg-black/55 backdrop-blur-md ring-1 ring-white/15 hover:ring-[#FF8FAF]/50 hover:bg-black/75 transition-all w-full sm:w-auto justify-center min-w-[170px] sm:min-w-[180px]"
     >
