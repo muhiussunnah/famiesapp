@@ -1,30 +1,103 @@
 'use client';
-import { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Loader2, CheckCircle, Mail, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 /**
  * Famies Coming Soon landing, dark, minimal, brand-pure.
  * Matches the client mock: logo + bold message + launch date +
- * beta sign-up. Pink (#FF8FAF) + Mint (#CCFAD6) accents only.
+ * official-style App Store and Google Play download badges.
+ * Pink (#FF8FAF) + Mint (#CCFAD6) accents only.
  */
+
+// Replace the placeholder hrefs once the apps are listed on the
+// respective stores. Keeping them inert (#) prevents broken-link
+// pages from confusing pre-launch visitors.
+const GOOGLE_PLAY_URL = '#';
+const APP_STORE_URL = '#';
+
+function GooglePlayIcon({ className }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 512 512"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id="gpGreen" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#00C170" />
+          <stop offset="100%" stopColor="#00A95C" />
+        </linearGradient>
+        <linearGradient id="gpYellow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#FFD814" />
+          <stop offset="100%" stopColor="#FFB400" />
+        </linearGradient>
+        <linearGradient id="gpRed" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#FF5252" />
+          <stop offset="100%" stopColor="#E62117" />
+        </linearGradient>
+        <linearGradient id="gpBlue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#00C2FF" />
+          <stop offset="100%" stopColor="#007EE5" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M70 40 L70 472 L300 256 Z"
+        fill="url(#gpBlue)"
+      />
+      <path
+        d="M70 40 L300 256 L390 168 L120 18 Q90 4 70 40 Z"
+        fill="url(#gpGreen)"
+      />
+      <path
+        d="M70 472 L300 256 L390 344 L120 494 Q90 508 70 472 Z"
+        fill="url(#gpRed)"
+      />
+      <path
+        d="M300 256 L390 168 L470 220 Q500 244 500 256 Q500 268 470 292 L390 344 Z"
+        fill="url(#gpYellow)"
+      />
+    </svg>
+  );
+}
+
+function AppleIcon({ className }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 384 512"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden
+    >
+      <path
+        fill="currentColor"
+        d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM256.6 105.1c29.3-34.8 26.6-66.4 25.7-77.8-25.8 1.5-55.6 17.6-72.6 37.4-18.7 21.2-29.7 47.4-27.3 76.6 27.9 2.1 53.3-12.2 74.2-36.2z"
+      />
+    </svg>
+  );
+}
+
+function StoreBadge({ href, label, store, icon }) {
+  return (
+    <a
+      href={href}
+      aria-label={`${label} ${store}`}
+      className="press group flex items-center gap-3 px-5 py-3 rounded-2xl bg-black/55 backdrop-blur-md ring-1 ring-white/15 hover:ring-[#FF8FAF]/50 hover:bg-black/75 transition-all w-full sm:w-auto justify-center min-w-[170px] sm:min-w-[180px]"
+    >
+      {icon}
+      <div className="flex flex-col items-start leading-tight">
+        <span className="text-[10px] sm:text-[11px] text-white/65 font-medium tracking-wide">
+          {label}
+        </span>
+        <span className="text-base sm:text-lg font-extrabold text-white -mt-0.5">
+          {store}
+        </span>
+      </div>
+    </a>
+  );
+}
+
 export default function ComingSoon() {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-
-  // Simple, no-backend submission, show a warm Swedish thank-you.
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    if (!email || loading) return;
-    setLoading(true);
-    // tiny delay so the loading state feels real
-    await new Promise((r) => setTimeout(r, 450));
-    setDone(true);
-    setLoading(false);
-  };
-
   return (
     <main
       className="fixed inset-0 z-[200] min-h-screen w-full overflow-hidden flex flex-col items-center justify-between text-white"
@@ -91,7 +164,7 @@ export default function ComingSoon() {
         </span>
       </motion.header>
 
-      {/* CENTER, headline + form */}
+      {/* CENTER, headline + download badges */}
       <section className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 max-w-2xl mx-auto w-full">
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
@@ -132,99 +205,29 @@ export default function ComingSoon() {
             </span>
           </div>
           <p className="text-sm text-white/55 font-medium">
-            Bli en av de första att testa beta-versionen.
+            Ladda ner appen så snart den släpps.
           </p>
         </motion.div>
 
-        {/* Beta sign-up form / thank-you state */}
+        {/* Store download badges */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.65 }}
-          className="mt-7 w-full max-w-md"
+          className="mt-7 sm:mt-9 w-full max-w-md flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4"
         >
-          <AnimatePresence mode="wait">
-            {!done ? (
-              <motion.form
-                key="form"
-                onSubmit={handleSubscribe}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
-              >
-                <div className="relative group">
-                  <Mail
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#FF8FAF] transition-colors"
-                    size={18}
-                  />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="din@epost.se"
-                    autoComplete="email"
-                    className="w-full bg-white/[0.05] backdrop-blur-md ring-1 ring-white/10 focus:ring-2 focus:ring-[#FF8FAF]/40 rounded-2xl py-3.5 pl-12 pr-36 text-white placeholder:text-white/30 outline-none transition-all"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="press absolute right-1.5 top-1.5 bottom-1.5 px-5 rounded-xl bg-[#FF8FAF] text-white font-extrabold text-sm flex items-center gap-2 shadow-[0_8px_24px_-6px_rgba(255,143,175,0.6)] hover:shadow-[0_12px_32px_-6px_rgba(255,143,175,0.8)] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <>
-                        Anmäl <ArrowRight size={15} />
-                      </>
-                    )}
-                  </button>
-                </div>
-                <p className="mt-3 text-center text-[11px] text-white/40">
-                  Ingen spam. Vi mejlar bara när det är dags att testa.
-                </p>
-              </motion.form>
-            ) : (
-              <motion.div
-                key="thanks"
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="relative rounded-2xl px-6 py-7 text-center bg-white/[0.05] backdrop-blur-md ring-1 ring-[#FF8FAF]/30 shadow-[0_20px_60px_-20px_rgba(255,143,175,0.45)] overflow-hidden"
-              >
-                {/* soft glow */}
-                <div
-                  aria-hidden
-                  className="absolute -inset-10 rounded-full pointer-events-none"
-                  style={{
-                    background:
-                      'radial-gradient(circle at 50% 30%, rgba(255,143,175,0.18), transparent 60%)',
-                  }}
-                />
-
-                <motion.div
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.05, type: 'spring', damping: 14, stiffness: 220 }}
-                  className="relative mx-auto mb-3 w-12 h-12 rounded-full bg-[#FF8FAF] flex items-center justify-center shadow-[0_0_28px_rgba(255,143,175,0.65)]"
-                >
-                  <CheckCircle className="text-white" size={24} strokeWidth={3} />
-                </motion.div>
-
-                <h3 className="relative text-xl sm:text-2xl font-black text-white leading-tight">
-                  Tack för din anmälan!
-                </h3>
-                <p className="relative mt-1.5 text-sm text-white/65 font-medium">
-                  Vi hör av oss så snart beta-versionen är redo.
-                </p>
-                <p className="relative mt-3 text-[11px] uppercase tracking-[0.18em] font-bold text-[#FF8FAF] flex items-center justify-center gap-1.5">
-                  <Heart size={11} className="fill-current" /> Välkommen till Famies-familjen
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <StoreBadge
+            href={GOOGLE_PLAY_URL}
+            label="Ladda ner på"
+            store="Google Play"
+            icon={<GooglePlayIcon className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />}
+          />
+          <StoreBadge
+            href={APP_STORE_URL}
+            label="Ladda ner på"
+            store="App Store"
+            icon={<AppleIcon className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-white" />}
+          />
         </motion.div>
       </section>
 
