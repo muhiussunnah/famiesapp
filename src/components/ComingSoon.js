@@ -201,11 +201,11 @@ export default function ComingSoon() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF8FAF]" />
             </span>
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">
-              Lanseras juni 2026
+              Lansering pågår
             </span>
           </div>
           <p className="text-sm text-white/55 font-medium">
-            Ladda ner appen så snart den släpps.
+            Tillgänglig nu i App Store och Google Play.
           </p>
         </motion.div>
 
