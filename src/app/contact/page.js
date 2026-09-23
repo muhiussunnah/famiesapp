@@ -17,6 +17,11 @@ import {
 import { supabase } from '@/lib/supabaseClient';
 import toast from 'react-hot-toast';
 
+// Apps Script Web App endpoint — appends rows to the "Contact" tab of the
+// Famies Google Sheet. Source: google-apps-script/contact-form.gs
+const CONTACT_SHEET_URL = 
+  'https://script.google.com/macros/s/AKfycbyq16q7an0PgYXiZHyPnM7kWO8BYiaZN7wTnu7M5yQ4Crz-OTx8ODHhdh0FoGNSt5ncTQ/exec';
+
 export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -39,11 +44,24 @@ export default function Contact() {
     const loadingToast = toast.loading('Skickar ditt meddelande...');
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([formData]);
+      // Google Sheet ("Contact" tab) is the primary inbox; Supabase is a backup.
+      // Apps Script has no CORS headers, so no-cors: the row is appended but
+      // the response is opaque. Only a network failure makes fetch throw.
+      const [sheetResult, dbResult] = await Promise.allSettled([
+        fetch(CONTACT_SHEET_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(formData),
+        }),
+        supabase.from('contact_messages').insert([formData]),
+      ]);
 
-      if (error) throw error;
+      const dbError =
+        dbResult.status === 'rejected' ? dbResult.reason : dbResult.value.error;
+      if (dbError) console.error(dbError);
+      if (sheetResult.status === 'rejected' && dbError) {
+        throw sheetResult.reason;
+      }
 
       toast.success(
         <span className="flex flex-col">
