@@ -114,7 +114,7 @@ export default function Contact() {
 
             <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 leading-relaxed max-w-lg font-medium">
               Fråga, ge feedback, eller tipsa oss om ett evenemang. Vi läser
-              varje meddelande själva.
+              varje meddelande själva, och återkommer så fort vi bara kan.
             </p>
           </div>
 
@@ -242,7 +242,8 @@ export default function Contact() {
                   Meddelande skickat
                 </h2>
                 <p className="text-ink-500 dark:text-ink-300 text-lg mb-8 max-w-md mx-auto">
-                  Vi återkommer så fort vi bara kan.
+                  Tack för att du hörde av dig. Vi återkommer så fort vi
+                  bara kan.
                 </p>
                 <button
                   onClick={() => setSuccess(false)}
