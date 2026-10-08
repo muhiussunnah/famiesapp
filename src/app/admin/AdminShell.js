@@ -9,7 +9,6 @@ import {
   LogOut, ArrowUpRight,
 } from 'lucide-react';
 import { AdminModalProvider } from '@/components/admin/AdminModal';
-import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
 
 // Same sections as the mushroomidentifiers.com admin, minus Subscriptions
@@ -58,7 +57,7 @@ export default function AdminShell({ children, userEmail }) {
   const isActive = (href) => (href === '/admin' ? pathname === '/admin' : pathname.startsWith(href));
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     router.push('/login');
     router.refresh();
   };

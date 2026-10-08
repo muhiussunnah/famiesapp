@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.vercel
+.claude
+.env*
+!.env.example
+uploads
+npm-debug.log*
+Dockerfile
+docker-compose.yml
+README.md

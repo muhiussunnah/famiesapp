@@ -14,7 +14,7 @@ import {
   Clock,
   Heart,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { submitForm } from '@/lib/forms';
 import toast from 'react-hot-toast';
 
 // Apps Script Web App endpoint — appends rows to the "Contact" tab of the
@@ -44,7 +44,7 @@ export default function Contact() {
     const loadingToast = toast.loading('Skickar ditt meddelande...');
 
     try {
-      // Google Sheet ("Contact" tab) is the primary inbox; Supabase is a backup.
+      // Google Sheet ("Contact" tab) is the primary inbox; the database is a backup.
       // Apps Script has no CORS headers, so no-cors: the row is appended but
       // the response is opaque. Only a network failure makes fetch throw.
       const [sheetResult, dbResult] = await Promise.allSettled([
@@ -53,7 +53,7 @@ export default function Contact() {
           mode: 'no-cors',
           body: JSON.stringify(formData),
         }),
-        supabase.from('contact_messages').insert([formData]),
+        submitForm('contact', formData),
       ]);
 
       const dbError =

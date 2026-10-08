@@ -29,9 +29,9 @@ const LAYOUTS = ['with-sidebar', 'full-page'];
 const RESERVED_SLUGS = [
   '/admin', '/api', '/inspiration', '/contact', '/privacy', '/terms', '/deletion',
   '/skapa-event', '/partnerpresentation', '/login', '/early-access', '/auth',
-  '/sitemap.xml', '/robots.txt', '/feed.xml',
-  // Other app routes that exist in src/app today.
-  '/dashboard', '/register', '/settings',
+  '/sitemap.xml', '/robots.txt', '/feed.xml', '/uploads', '/indexnow-key',
+  // Old URLs that now redirect.
+  '/dashboard', '/register', '/settings', '/blog',
 ];
 
 const LIST_FIELDS =

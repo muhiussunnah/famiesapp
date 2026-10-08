@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 import { revalidatePosts } from '@/lib/cache';
 
 /**
@@ -7,7 +7,7 @@ import { revalidatePosts } from '@/lib/cache';
  *
  * Public pages already show "scheduled and due" posts on time, so this job
  * only tidies up the status (admin lists, Writerfy drafts, counts). Runs
- * daily via vercel.json; can also be hit by any external cron.
+ * daily (Coolify scheduled task or vercel.json); any cron can call it.
  *
  * Auth: Vercel Cron sends `Authorization: Bearer $CRON_SECRET`.
  */
@@ -21,9 +21,9 @@ export async function GET(req) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) {
-    return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY is not set on the server' }, { status: 503 });
+    return NextResponse.json({ error: 'DATABASE_URL is not set on the server' }, { status: 503 });
   }
 
   const { data: due, error } = await db

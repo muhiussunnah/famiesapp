@@ -163,7 +163,7 @@ export async function GET() {
   const { data: cache, error: dbError } = await db.from('indexing_cache').select('*').order('url');
   if (dbError) {
     return NextResponse.json(
-      { error: dbError.message, hint: 'Run supabase/famies-setup.sql — it creates the indexing_cache table.', config },
+      { error: dbError.message, hint: 'The indexing_cache table is created by db/schema.sql (applied on app start).', config },
       { status: 500 }
     );
   }

@@ -9,25 +9,23 @@
  *   url    → exact URL match (trailing slash and case ignored)
  */
 import { cache } from 'react';
-import { createPublicClient } from '@/lib/supabase/public';
+import { cachedRead } from '@/lib/db/cached';
 
-export const getNofollowRules = cache(async function getNofollowRules() {
-  const supabase = createPublicClient({ tags: ['nofollow-rules'] });
-  if (!supabase) return [];
-  try {
-    const { data, error } = await supabase
+const loadRules = cachedRead(
+  async (db) => {
+    const { data, error } = await db
       .from('external_links_nofollow')
       .select('pattern, match_type')
       .eq('enabled', true);
-    if (error) {
-      console.error('[external-links] fetch error:', error.message);
-      return [];
-    }
+    if (error) throw new Error(error.message);
     return data ?? [];
-  } catch (err) {
-    console.error('[external-links] unexpected error:', err?.message || err);
-    return [];
-  }
+  },
+  ['nofollow-rules'],
+  { tags: ['nofollow-rules'] }
+);
+
+export const getNofollowRules = cache(async function getNofollowRules() {
+  return (await loadRules()) ?? [];
 });
 
 function safeHostname(href) {

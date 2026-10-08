@@ -1,22 +1,15 @@
 -- ============================================================
--- Famies — complete Supabase setup
+-- Famies — PostgreSQL schema
 -- ============================================================
--- Run this ONCE in the Supabase SQL Editor of the Famies project
--- (Dashboard → SQL Editor → New query → paste → Run).
--- It is idempotent: running it again only fills in what is missing.
---
--- Creates everything the website + admin panel (/admin) + Writerfy
--- publishing API need: articles, view counts, site settings, menus,
--- header scripts, homepage blocks, footer content, external-link
--- rules, rank tracker, indexing report cache, the public form
--- tables (contact / newsletter / early access) and the image bucket.
---
--- After running it:
---   1. Authentication → Users → "Add user" → create the admin login
---      (email must be listed in ADMIN_EMAILS / src/lib/admin.js).
---   2. Authentication → Sign In / Providers → turn OFF "Allow new users
---      to sign up" (Famies has no public accounts).
---   3. Put the project URL + keys in Vercel env vars (see README).
+-- Applied automatically on every app start by scripts/migrate.mjs
+-- (idempotent: creates what is missing, seeds empty tables once).
+-- Can also be run by hand: psql "$DATABASE_URL" -f db/schema.sql
+-- ============================================================
+-- Everything the website, the admin panel (/admin) and the Writerfy API
+-- need: articles, view counts, site settings, menus, header scripts,
+-- homepage blocks, footer content, external-link rules, rank tracker,
+-- indexing report cache and the public form tables. Uploaded images live
+-- on disk (UPLOAD_DIR), not in the database.
 -- ============================================================
 
 -- Shared trigger function: keep updated_at current on every UPDATE.
@@ -27,7 +20,6 @@ begin
   return new;
 end;
 $$ language plpgsql;
-
 
 -- ── 1. BLOG POSTS (articles + standalone pages) ──────────────
 -- slug is stored WITH a leading slash ("/my-article") and served at
@@ -63,22 +55,10 @@ create index if not exists idx_blog_posts_status    on public.blog_posts (status
 create index if not exists idx_blog_posts_published on public.blog_posts (published_at desc);
 create index if not exists idx_blog_posts_scheduled on public.blog_posts (scheduled_at) where status = 'scheduled';
 
-alter table public.blog_posts enable row level security;
-
--- Public visitors see published posts, plus scheduled posts whose time has
--- come (so a post goes live exactly on time even before the cron job flips
--- its status).
-drop policy if exists "Public read live posts" on public.blog_posts;
-create policy "Public read live posts"
-  on public.blog_posts for select
-  to anon, authenticated
-  using (status = 'published' or (status = 'scheduled' and scheduled_at <= now()));
-
 drop trigger if exists trg_blog_posts_updated_at on public.blog_posts;
 create trigger trg_blog_posts_updated_at
   before update on public.blog_posts
   for each row execute function public.famies_touch_updated_at();
-
 
 -- ── 2. PAGE VIEWS ────────────────────────────────────────────
 create table if not exists public.page_views (
@@ -86,12 +66,6 @@ create table if not exists public.page_views (
   views      integer not null default 0,
   updated_at timestamptz not null default now()
 );
-
-alter table public.page_views enable row level security;
-
-drop policy if exists "Public read page views" on public.page_views;
-create policy "Public read page views"
-  on public.page_views for select to anon, authenticated using (true);
 
 -- Atomic +1 used by /api/views (no read-then-write race).
 create or replace function public.increment_page_view(p_slug text)
@@ -107,11 +81,7 @@ begin
   update public.blog_posts set views = views + 1 where slug = p_slug;
   return new_count;
 end;
-$$ language plpgsql security definer set search_path = public;
-
-revoke all on function public.increment_page_view(text) from public;
-grant execute on function public.increment_page_view(text) to service_role;
-
+$$ language plpgsql;
 
 -- ── 3. SITE SETTINGS (key → value) ───────────────────────────
 create table if not exists public.site_settings (
@@ -127,12 +97,6 @@ create table if not exists public.site_settings (
 );
 
 create index if not exists idx_site_settings_group on public.site_settings (group_name, sort_order);
-
-alter table public.site_settings enable row level security;
-
-drop policy if exists "Public read site settings" on public.site_settings;
-create policy "Public read site settings"
-  on public.site_settings for select to anon, authenticated using (true);
 
 drop trigger if exists trg_site_settings_updated_at on public.site_settings;
 create trigger trg_site_settings_updated_at
@@ -180,7 +144,6 @@ insert into public.site_settings (key, value, type, group_name, label, descripti
   ('theme_text', '', 'text', 'theme', 'Text color', 'Main text color. Empty = default.', 5)
 on conflict (key) do nothing;
 
-
 -- ── 4. SOCIAL LINKS (footer icons) ───────────────────────────
 create table if not exists public.social_links (
   id         uuid primary key default gen_random_uuid(),
@@ -194,12 +157,6 @@ create table if not exists public.social_links (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
-alter table public.social_links enable row level security;
-
-drop policy if exists "Public read enabled social links" on public.social_links;
-create policy "Public read enabled social links"
-  on public.social_links for select to anon, authenticated using (enabled = true);
 
 drop trigger if exists trg_social_links_updated_at on public.social_links;
 create trigger trg_social_links_updated_at
@@ -220,7 +177,6 @@ select * from (values
 ) as seed(label, href, icon_svg, bg_color, icon_color, sort_order)
 where not exists (select 1 from public.social_links);
 
-
 -- ── 5. FOOTER BADGES (partner / award images) ────────────────
 create table if not exists public.footer_badges (
   id         uuid primary key default gen_random_uuid(),
@@ -236,17 +192,10 @@ create table if not exists public.footer_badges (
   updated_at timestamptz not null default now()
 );
 
-alter table public.footer_badges enable row level security;
-
-drop policy if exists "Public read enabled footer badges" on public.footer_badges;
-create policy "Public read enabled footer badges"
-  on public.footer_badges for select to anon, authenticated using (enabled = true);
-
 drop trigger if exists trg_footer_badges_updated_at on public.footer_badges;
 create trigger trg_footer_badges_updated_at
   before update on public.footer_badges
   for each row execute function public.famies_touch_updated_at();
-
 
 -- ── 6. MENUS ─────────────────────────────────────────────────
 create table if not exists public.menu_items (
@@ -262,12 +211,6 @@ create table if not exists public.menu_items (
 );
 
 create index if not exists idx_menu_items_sort on public.menu_items (location, sort_order);
-
-alter table public.menu_items enable row level security;
-
-drop policy if exists "Public read enabled menu items" on public.menu_items;
-create policy "Public read enabled menu items"
-  on public.menu_items for select to anon, authenticated using (enabled = true);
 
 drop trigger if exists trg_menu_items_updated_at on public.menu_items;
 create trigger trg_menu_items_updated_at
@@ -295,7 +238,6 @@ select * from (values
 ) as seed(location, label, url, sort_order)
 where not exists (select 1 from public.menu_items);
 
-
 -- ── 7. HEADER SCRIPTS (GA, Search Console, pixels …) ─────────
 create table if not exists public.site_scripts (
   id         uuid primary key default gen_random_uuid(),
@@ -308,17 +250,10 @@ create table if not exists public.site_scripts (
   updated_at timestamptz not null default now()
 );
 
-alter table public.site_scripts enable row level security;
-
-drop policy if exists "Public read enabled scripts" on public.site_scripts;
-create policy "Public read enabled scripts"
-  on public.site_scripts for select to anon, authenticated using (enabled = true);
-
 drop trigger if exists trg_site_scripts_updated_at on public.site_scripts;
 create trigger trg_site_scripts_updated_at
   before update on public.site_scripts
   for each row execute function public.famies_touch_updated_at();
-
 
 -- ── 8. HOMEPAGE BLOCKS ───────────────────────────────────────
 create table if not exists public.homepage_blocks (
@@ -333,17 +268,10 @@ create table if not exists public.homepage_blocks (
 
 create index if not exists idx_homepage_blocks_order on public.homepage_blocks (order_index) where visible = true;
 
-alter table public.homepage_blocks enable row level security;
-
-drop policy if exists "Public read visible homepage blocks" on public.homepage_blocks;
-create policy "Public read visible homepage blocks"
-  on public.homepage_blocks for select to anon, authenticated using (visible = true);
-
 drop trigger if exists trg_homepage_blocks_updated_at on public.homepage_blocks;
 create trigger trg_homepage_blocks_updated_at
   before update on public.homepage_blocks
   for each row execute function public.famies_touch_updated_at();
-
 
 -- ── 9. EXTERNAL LINKS — nofollow rules ───────────────────────
 create table if not exists public.external_links_nofollow (
@@ -359,17 +287,10 @@ create table if not exists public.external_links_nofollow (
 create unique index if not exists external_links_nofollow_pattern_type_idx
   on public.external_links_nofollow (lower(pattern), match_type);
 
-alter table public.external_links_nofollow enable row level security;
-
-drop policy if exists "Public read enabled nofollow rules" on public.external_links_nofollow;
-create policy "Public read enabled nofollow rules"
-  on public.external_links_nofollow for select to anon, authenticated using (enabled = true);
-
 drop trigger if exists trg_external_links_nofollow_updated_at on public.external_links_nofollow;
 create trigger trg_external_links_nofollow_updated_at
   before update on public.external_links_nofollow
   for each row execute function public.famies_touch_updated_at();
-
 
 -- ── 10. RANK TRACKER ─────────────────────────────────────────
 create table if not exists public.rank_keywords (
@@ -384,10 +305,6 @@ create table if not exists public.rank_keywords (
   created_at    timestamptz not null default now()
 );
 
-alter table public.rank_keywords enable row level security;
--- No public policies: only the service role (admin API) touches it.
-
-
 -- ── 11. INDEXING REPORT CACHE ────────────────────────────────
 create table if not exists public.indexing_cache (
   url                   text primary key,
@@ -401,10 +318,6 @@ create table if not exists public.indexing_cache (
   index_requested_at    timestamptz,
   indexnow_requested_at timestamptz
 );
-
-alter table public.indexing_cache enable row level security;
--- No public policies: only the service role (admin API) touches it.
-
 
 -- ── 12. PUBLIC FORMS (contact / newsletter / early access) ───
 create table if not exists public.contact_messages (
@@ -431,35 +344,6 @@ create table if not exists public.early_access (
   wants_feedback boolean,
   created_at     timestamptz not null default now()
 );
-
-alter table public.contact_messages enable row level security;
-alter table public.newsletter       enable row level security;
-alter table public.early_access     enable row level security;
-
--- Visitors may submit, never read.
-drop policy if exists "Anyone can submit contact" on public.contact_messages;
-create policy "Anyone can submit contact"
-  on public.contact_messages for insert to anon, authenticated with check (true);
-
-drop policy if exists "Anyone can subscribe" on public.newsletter;
-create policy "Anyone can subscribe"
-  on public.newsletter for insert to anon, authenticated with check (true);
-
-drop policy if exists "Anyone can request early access" on public.early_access;
-create policy "Anyone can request early access"
-  on public.early_access for insert to anon, authenticated with check (true);
-
-
--- ── 13. STORAGE (article images) ─────────────────────────────
-insert into storage.buckets (id, name, public)
-values ('images', 'images', true)
-on conflict (id) do nothing;
-
-drop policy if exists "Public read famies images" on storage.objects;
-create policy "Public read famies images"
-  on storage.objects for select using (bucket_id = 'images');
--- Uploads go through /api/admin/upload with the service role, so no
--- insert policy is needed for visitors.
 
 -- ============================================================
 -- Done.

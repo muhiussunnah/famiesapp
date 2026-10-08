@@ -74,7 +74,7 @@ const HERO_DEFAULTS = {
 
 /** "*word*" → pink gradient, same rule as the public Hero. */
 function heroTitle(title) {
-  return title.split(/(*[^*]+*)/g).map((part, i) =>
+  return title.split(/(\*[^*]+\*)/g).map((part, i) =>
     part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
       <span key={i} className="text-brand-gradient">{part.slice(1, -1)}</span>
     ) : (

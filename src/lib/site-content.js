@@ -7,7 +7,7 @@
  * Never throws: on any error the site renders with built-in defaults.
  */
 import { cache } from 'react';
-import { createPublicClient } from '@/lib/supabase/public';
+import { cachedRead } from '@/lib/db/cached';
 import { LIVE } from '@/lib/siteConfig';
 
 const EMPTY_CONTENT = {
@@ -17,27 +17,20 @@ const EMPTY_CONTENT = {
   available: false,
 };
 
-export const getSiteContent = cache(async function getSiteContent() {
-  const supabase = createPublicClient({ tags: ['site-content'] });
-  if (!supabase) return EMPTY_CONTENT;
-
-  try {
+const loadSiteContent = cachedRead(
+  async (db) => {
     const [settingsRes, socialsRes, badgesRes] = await Promise.all([
-      supabase.from('site_settings').select('key, value'),
-      supabase.from('social_links').select('*').eq('enabled', true).order('sort_order', { ascending: true }),
-      supabase.from('footer_badges').select('*').eq('enabled', true).order('sort_order', { ascending: true }),
+      db.from('site_settings').select('key, value'),
+      db.from('social_links').select('*').eq('enabled', true).order('sort_order', { ascending: true }),
+      db.from('footer_badges').select('*').eq('enabled', true).order('sort_order', { ascending: true }),
     ]);
-
-    if (settingsRes.error) {
-      console.error('[site-content] settings error:', settingsRes.error.message);
-      return EMPTY_CONTENT;
-    }
+    const failed = settingsRes.error || socialsRes.error || badgesRes.error;
+    if (failed) throw new Error(failed.message);
 
     const settings = {};
     for (const row of settingsRes.data ?? []) {
       if (row.value != null) settings[row.key] = row.value;
     }
-
     const badges = badgesRes.data ?? [];
     return {
       settings,
@@ -48,10 +41,13 @@ export const getSiteContent = cache(async function getSiteContent() {
       },
       available: true,
     };
-  } catch (err) {
-    console.error('[site-content] unexpected error:', err?.message || err);
-    return EMPTY_CONTENT;
-  }
+  },
+  ['site-content'],
+  { tags: ['site-content'] }
+);
+
+export const getSiteContent = cache(async function getSiteContent() {
+  return (await loadSiteContent()) ?? EMPTY_CONTENT;
 });
 
 /**

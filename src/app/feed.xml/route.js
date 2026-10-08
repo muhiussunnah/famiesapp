@@ -27,7 +27,7 @@ export async function GET() {
       ${date ? `<pubDate>${new Date(date).toUTCString()}</pubDate>` : ''}
       ${post.category ? `<category>${escapeXml(post.category)}</category>` : ''}
       <description>${escapeXml(post.excerpt)}</description>
-      ${post.featured_image ? `<enclosure url="${escapeXml(post.featured_image)}" type="image/${/\.png(\?|$)/i.test(post.featured_image) ? 'png' : /\.webp(\?|$)/i.test(post.featured_image) ? 'webp' : 'jpeg'}" length="0" />` : ''}
+      ${post.featured_image ? `<enclosure url="${escapeXml(/^https?:\/\//i.test(post.featured_image) ? post.featured_image : absoluteUrl(post.featured_image))}" type="image/${/\.png(\?|$)/i.test(post.featured_image) ? 'png' : /\.webp(\?|$)/i.test(post.featured_image) ? 'webp' : 'jpeg'}" length="0" />` : ''}
     </item>`;
     })
     .join('\n');

@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { cookies } from 'next/headers';
+import { getDb } from '@/lib/db';
+import { SESSION_COOKIE, verifySessionToken } from '@/lib/auth';
 
 /**
- * Admin access control. Only these emails can open /admin or call
- * /api/admin/*. Add more without a code change via the ADMIN_EMAILS env
- * var (comma separated).
+ * Admin access control. Only these emails can sign in to /admin or call
+ * /api/admin/*. More can be added without a code change via ADMIN_EMAIL /
+ * ADMIN_EMAILS (comma separated). The password is ADMIN_PASSWORD.
  */
 const ADMIN_EMAILS = ['itsinjamul@gmail.com'];
 
 function adminEmails() {
-  const extra = (process.env.ADMIN_EMAILS || '')
+  const extra = `${process.env.ADMIN_EMAILS || ''},${process.env.ADMIN_EMAIL || ''}`
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
@@ -18,17 +19,16 @@ function adminEmails() {
 }
 
 export function isAdminEmail(email) {
-  if (!email) return false;
-  return adminEmails().has(email.toLowerCase());
+  if (!email || typeof email !== 'string') return false;
+  return adminEmails().has(email.trim().toLowerCase());
 }
 
-/** The signed-in admin user, or null (not signed in / not an admin). */
+/** The signed-in admin ({ email }) from the session cookie, or null. */
 export async function getAdminUser() {
-  const supabase = await createClient();
-  if (!supabase) return null;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !isAdminEmail(user.email)) return null;
-  return user;
+  const store = await cookies();
+  const session = verifySessionToken(store.get(SESSION_COOKIE)?.value);
+  if (!session || !isAdminEmail(session.email)) return null;
+  return session;
 }
 
 /**
@@ -37,22 +37,18 @@ export async function getAdminUser() {
  *   const { db, user, error } = await requireAdmin();
  *   if (error) return error;
  *
- * `db` is the service-role client (bypasses RLS). `error` is a ready-made
- * 401 / 503 response when the caller is not allowed or the server is not
- * configured.
+ * `error` is a ready-made 401 / 503 response when the caller is not an
+ * admin or the database is not configured.
  */
 export async function requireAdmin() {
   const user = await getAdminUser();
   if (!user) {
     return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
   }
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) {
     return {
-      error: NextResponse.json(
-        { error: 'SUPABASE_SERVICE_ROLE_KEY is not set on the server.' },
-        { status: 503 }
-      ),
+      error: NextResponse.json({ error: 'DATABASE_URL is not set on the server.' }, { status: 503 }),
     };
   }
   return { db, user };

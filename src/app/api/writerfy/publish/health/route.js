@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkWriterfyAuth } from '@/lib/writerfy-auth';
-import { hasServiceRoleEnv } from '@/lib/supabase/env';
+import { hasDatabase } from '@/lib/db';
 
 /**
  * GET /api/writerfy/publish/health — Writerify's "Test connection" button
@@ -18,9 +18,9 @@ export async function GET(req) {
       { status: 401 }
     );
   }
-  if (!hasServiceRoleEnv()) {
+  if (!hasDatabase()) {
     return NextResponse.json(
-      { ok: false, error: 'Database not configured: set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY' },
+      { ok: false, error: 'Database not configured: set DATABASE_URL' },
       { status: 503 }
     );
   }

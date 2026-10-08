@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Menu, X } from 'lucide-react';
-import { DEFAULT_MENUS } from '@/lib/menus';
+import { DEFAULT_MENUS } from '@/lib/menu-defaults';
 
 // Header links come from /admin/menus ("header"); these are the fallback.
 export default function Navbar({ links = DEFAULT_MENUS.header }) {

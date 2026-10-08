@@ -11,59 +11,33 @@
  * so the site never loses its navigation.
  */
 import { cache } from 'react';
-import { createPublicClient } from '@/lib/supabase/public';
+import { cachedRead } from '@/lib/db/cached';
 
-const item = (location, label, url) => ({ id: `${location}-${url}`, location, label, url, target: '_self' });
+import { DEFAULT_MENUS } from '@/lib/menu-defaults';
 
-export const DEFAULT_MENUS = {
-  header: [
-    item('header', 'Hem', '/'),
-    item('header', 'Inspiration', '/inspiration'),
-    item('header', 'Skapa event', '/skapa-event'),
-    item('header', 'Kontakt', '/contact'),
-  ],
-  footerExplore: [
-    item('footer_explore', 'Hem', '/'),
-    item('footer_explore', 'Så funkar det', '/#how'),
-    item('footer_explore', 'Funktioner', '/#features'),
-    item('footer_explore', 'Recensioner', '/#reviews'),
-    item('footer_explore', 'Inspiration', '/inspiration'),
-    item('footer_explore', 'Skapa event', '/skapa-event'),
-  ],
-  footerCompany: [
-    item('footer_company', 'Kontakt', '/contact'),
-    item('footer_company', 'Privacy Policy', '/privacy'),
-    item('footer_company', 'Terms of Use', '/terms'),
-    item('footer_company', 'Account Deletion Manual', '/deletion'),
-  ],
-  footerBottom: [],
-};
+export { DEFAULT_MENUS };
 
-export const getMenus = cache(async function getMenus() {
-  const supabase = createPublicClient({ tags: ['menus'] });
-  if (!supabase) return DEFAULT_MENUS;
-
-  try {
-    const { data, error } = await supabase
+const loadMenus = cachedRead(
+  async (db) => {
+    const { data, error } = await db
       .from('menu_items')
       .select('id, location, label, url, target, sort_order')
       .eq('enabled', true)
       .order('sort_order', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+  ['menus'],
+  { tags: ['menus'] }
+);
 
-    if (error || !data) {
-      if (error) console.error('[menus] fetch error:', error.message);
-      return DEFAULT_MENUS;
-    }
-    if (data.length === 0) return DEFAULT_MENUS;
-
-    return {
-      header: data.filter((m) => m.location === 'header'),
-      footerExplore: data.filter((m) => m.location === 'footer_explore'),
-      footerCompany: data.filter((m) => m.location === 'footer_company'),
-      footerBottom: data.filter((m) => m.location === 'footer_bottom'),
-    };
-  } catch (err) {
-    console.error('[menus] unexpected error:', err?.message || err);
-    return DEFAULT_MENUS;
-  }
+export const getMenus = cache(async function getMenus() {
+  const data = await loadMenus();
+  if (!data || data.length === 0) return DEFAULT_MENUS;
+  return {
+    header: data.filter((m) => m.location === 'header'),
+    footerExplore: data.filter((m) => m.location === 'footer_explore'),
+    footerCompany: data.filter((m) => m.location === 'footer_company'),
+    footerBottom: data.filter((m) => m.location === 'footer_bottom'),
+  };
 });

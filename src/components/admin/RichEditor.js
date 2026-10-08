@@ -537,7 +537,7 @@ export default function RichEditor({ value, onChange, resetKey, placeholder = 'S
       const formData = new FormData();
       formData.append('file', file);
       const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
-      if (res.status === 413) throw new Error('File too large (max 4 MB).');
+      if (res.status === 413) throw new Error('File too large (max 8 MB).');
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       insertHtml(`${imageHtml(data.url, alt)}<p><br></p>`);

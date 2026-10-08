@@ -1,7 +1,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { BLOG_PATH } from '@/lib/site';
 
-/** Every data-cache tag used by createPublicClient() callers. */
+/** Every data-cache tag used by cachedRead() loaders (src/lib/db/cached.js). */
 export const CACHE_TAGS = [
   'posts',
   'site-content',
@@ -9,6 +9,7 @@ export const CACHE_TAGS = [
   'site-scripts',
   'homepage-blocks',
   'nofollow-rules',
+  'views',
 ];
 
 /**

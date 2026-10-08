@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/admin';
 import { slugify } from '@/lib/content-helpers';
 
 /**
- * Admin image upload → Supabase Storage bucket "images" (public).
+ * Admin image upload → server disk (UPLOAD_DIR), served at /uploads/….
  *
  * POST multipart/form-data with a `file` field.
  * Returns { url, path } where path is "blog/<timestamp>-<safe-name>.<ext>".
@@ -11,8 +11,8 @@ import { slugify } from '@/lib/content-helpers';
 export const dynamic = 'force-dynamic';
 
 const BUCKET = 'images';
-// Vercel rejects request bodies above ~4.5 MB before they reach this route.
-const MAX_BYTES = 4 * 1024 * 1024;
+// Self-hosted (Coolify): no platform body limit, so allow decent originals.
+const MAX_BYTES = 8 * 1024 * 1024;
 
 // MIME type → file extension. The extension comes from the type, not the
 // file name, so "photo.php.png"-style names can't sneak through.
@@ -44,7 +44,7 @@ export async function POST(req) {
   }
 
   if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: 'File too large. Maximum 4 MB — compress the image (e.g. WebP) and try again.' }, { status: 400 });
+    return NextResponse.json({ error: 'File too large. Maximum 8 MB — compress the image (e.g. WebP) and try again.' }, { status: 400 });
   }
 
   const baseName = String(file.name || '').replace(/\.[^/.]+$/, '');

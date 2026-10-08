@@ -10,6 +10,11 @@ import { renderHeadScript, renderBodySnippet, splitHeadSnippets } from "@/lib/re
 import { buildThemeCSS } from "@/lib/theme-colors";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
+// Pages are prerendered at build time without the database (it is not
+// reachable during the Docker build), so re-render them at most every 60s
+// to pick up menus, footer texts, header scripts and theme from the DB.
+export const revalidate = 60;
+
 // Satoshi, served from the local .otf files
 const satoshi = localFont({
   src: [

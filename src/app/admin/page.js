@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 import { isComingSoon } from '@/lib/site-content';
 import DashboardClient from './DashboardClient';
 
@@ -13,9 +13,9 @@ export const dynamic = 'force-dynamic';
  * /api/admin/analytics.
  */
 async function readSiteMode() {
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) {
-    return { comingSoon: null, saved: false, error: 'SUPABASE_SERVICE_ROLE_KEY is not set on the server.' };
+    return { comingSoon: null, saved: false, error: 'DATABASE_URL is not set on the server.' };
   }
   try {
     const { data, error } = await db

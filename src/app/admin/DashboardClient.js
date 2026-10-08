@@ -2,7 +2,7 @@
 /**
  * Admin Dashboard UI (rendered by ./page.js):
  *   1. Site mode — the Coming Soon switch (site_settings.coming_soon)
- *   2. Content   — posts / views / form submissions from Supabase
+ *   2. Content   — posts / views / form submissions from the database
  *   3. Traffic   — Google Analytics 4 + Search Console, or a
  *                  "not configured" card when the env vars are missing
  */

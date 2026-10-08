@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { checkWriterfyAuth } from '@/lib/writerfy-auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { storage } from '@/lib/db/storage';
+import { absoluteUrl } from '@/lib/site';
 
 /**
  * POST /api/writerfy/upload-image — multipart upload of one image (Writerfy
  * sends ~100–300 KB WebP) plus attribution (alt, license, creator,
  * sourcePage). Returns { url, path } for Writerfy to put in the Markdown.
  *
- * Storage: Vercel Blob when BLOB_READ_WRITE_TOKEN is set, otherwise the
- * Supabase Storage bucket "images" — so it works with either setup.
+ * Storage: the server's disk (UPLOAD_DIR, served at /uploads/…), or Vercel
+ * Blob when BLOB_READ_WRITE_TOKEN is set. The returned URL is absolute so
+ * Writerify can also show the image in its own UI.
  * GET → health check.
  */
 
@@ -81,14 +83,7 @@ export async function POST(req) {
       return NextResponse.json({ url: blob.url, path: blob.pathname });
     }
 
-    const db = createAdminClient();
-    if (!db) {
-      return NextResponse.json(
-        { error: 'No image storage configured', hint: 'Set BLOB_READ_WRITE_TOKEN or SUPABASE_SERVICE_ROLE_KEY.' },
-        { status: 503 }
-      );
-    }
-    const { error } = await db.storage
+    const { error } = await storage
       .from('images')
       .upload(pathname, new Uint8Array(await file.arrayBuffer()), {
         contentType,
@@ -96,8 +91,8 @@ export async function POST(req) {
         upsert: true,
       });
     if (error) throw error;
-    const { data } = db.storage.from('images').getPublicUrl(pathname);
-    return NextResponse.json({ url: data.publicUrl, path: pathname });
+    const { data } = storage.from('images').getPublicUrl(pathname);
+    return NextResponse.json({ url: absoluteUrl(data.publicUrl), path: pathname });
   } catch (err) {
     return NextResponse.json({ error: 'image upload failed', detail: err?.message || String(err) }, { status: 500 });
   }
@@ -111,6 +106,6 @@ export async function GET(req) {
     ok: true,
     service: 'writerfy-upload-image',
     version: 1,
-    storage: process.env.BLOB_READ_WRITE_TOKEN ? 'vercel-blob' : createAdminClient() ? 'supabase' : 'none',
+    storage: process.env.BLOB_READ_WRITE_TOKEN ? 'vercel-blob' : 'disk',
   });
 }

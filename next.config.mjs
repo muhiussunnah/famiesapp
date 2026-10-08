@@ -2,11 +2,12 @@
 const nextConfig = {
   reactCompiler: true,
 
+  // Self-contained server build for the Docker image (Coolify).
+  output: 'standalone',
+
   images: {
     remotePatterns: [
-      // Supabase Storage (article images uploaded from /admin)
-      { protocol: 'https', hostname: '*.supabase.co' },
-      // Vercel Blob (Writerfy image uploads)
+      // Vercel Blob (optional Writerfy image storage)
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },

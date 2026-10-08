@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Mail, Lock, ArrowRight, ArrowLeft, Loader2, Sparkles, Heart } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -20,11 +19,13 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-      if (error) throw error;
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || 'Det gick inte att logga in');
 
       toast.success('Välkommen tillbaka!');
       // Full reload so the server sees the new session cookie.

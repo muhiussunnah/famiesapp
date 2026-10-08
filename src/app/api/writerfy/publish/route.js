@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { marked } from 'marked';
 import { checkWriterfyAuth } from '@/lib/writerfy-auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { revalidatePosts } from '@/lib/cache';
 import {
@@ -45,7 +45,7 @@ export async function GET(req) {
     ok: true,
     service: 'writerfy-publish',
     version: 1,
-    databaseConfigured: !!createAdminClient(),
+    databaseConfigured: !!getDb(),
   });
 }
 
@@ -54,9 +54,9 @@ export async function POST(req) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) {
-    return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY is not set on the server' }, { status: 503 });
+    return NextResponse.json({ error: 'DATABASE_URL is not set on the server' }, { status: 503 });
   }
 
   let body;

@@ -368,7 +368,7 @@ export default function PostEditor({ postId = null }) {
       const fd = new FormData();
       fd.append('file', file);
       const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-      if (res.status === 413) throw new Error('File too large (max 4 MB).');
+      if (res.status === 413) throw new Error('File too large (max 8 MB).');
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       set('featured_image', data.url);

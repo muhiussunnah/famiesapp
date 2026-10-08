@@ -62,7 +62,7 @@ const BADGE_LOCATIONS = [
 
 const svgIcon = (d) => `<svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="${d}"/></svg>`;
 
-// Brand icon paths (same as the supabase/famies-setup.sql seed).
+// Brand icon paths (same as the db/schema.sql seed).
 const SOCIAL_PRESETS = [
   {
     label: 'Instagram',

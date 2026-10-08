@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# local image uploads (UPLOAD_DIR)
+/uploads
+
 # testing
 /coverage
 

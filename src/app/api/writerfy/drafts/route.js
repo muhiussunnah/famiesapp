@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkWriterfyAuth } from '@/lib/writerfy-auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 
 /**
  * GET /api/writerfy/drafts — every draft post, newest edit first. Writerfy's
@@ -16,9 +16,9 @@ export async function GET(req) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) {
-    return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY is not set on the server' }, { status: 503 });
+    return NextResponse.json({ error: 'DATABASE_URL is not set on the server' }, { status: 503 });
   }
 
   const { data, error } = await db

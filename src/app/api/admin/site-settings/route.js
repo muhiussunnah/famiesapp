@@ -31,7 +31,7 @@ export async function PUT(req) {
   const updates = Array.isArray(body?.updates) ? body.updates : [];
   // Only key + value: PostgREST fills columns missing from some rows with
   // NULL, so every row must carry the same keys. Labels/types come from
-  // the seed in supabase/famies-setup.sql; new keys get the column defaults.
+  // the seed in db/schema.sql; new keys get the column defaults.
   const rows = updates
     .filter((u) => u && typeof u.key === 'string' && u.key.trim())
     .map((u) => ({ key: u.key.trim(), value: u.value == null ? '' : String(u.value) }));

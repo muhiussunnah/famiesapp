@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 import { normalizeSlug } from '@/lib/content-helpers';
 
 /**
@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
-  const db = createAdminClient();
+  const db = getDb();
   const slugsParam = req.nextUrl.searchParams.get('slugs');
   if (slugsParam) {
     const slugs = slugsParam.split(',').map(normalizeSlug).filter(Boolean).slice(0, 100);
@@ -36,7 +36,7 @@ export async function POST(req) {
   const slug = normalizeSlug(raw);
   if (!slug) return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
 
-  const db = createAdminClient();
+  const db = getDb();
   if (!db) return NextResponse.json({ ok: false });
 
   // Only count real, live posts — keeps junk slugs out of page_views.

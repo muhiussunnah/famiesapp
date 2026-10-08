@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, Send, Loader2, CheckCircle, Sparkles, Lock } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { submitForm } from '@/lib/forms';
 
 export default function Newsletter() {
   const [email, setEmail] = useState('');
@@ -17,11 +17,8 @@ export default function Newsletter() {
     setStatus(null);
 
     try {
-      const { error } = await supabase.from('newsletter').insert([{ email }]);
-      if (error) {
-        if (error.code === '23505') throw new Error('You are already subscribed!');
-        throw error;
-      }
+      const { error } = await submitForm('newsletter', { email });
+      if (error) throw error;
       setStatus('success');
       setEmail('');
     } catch (error) {

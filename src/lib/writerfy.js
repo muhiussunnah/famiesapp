@@ -18,7 +18,7 @@ export function resolveCategory(input) {
 const RESERVED = new Set([
   'admin', 'api', 'inspiration', 'contact', 'privacy', 'terms', 'deletion', 'skapa-event',
   'partnerpresentation', 'login', 'early-access', 'auth', 'sitemap.xml', 'robots.txt',
-  'feed.xml', 'indexnow-key', '_next', 'favicon.ico',
+  'feed.xml', 'indexnow-key', '_next', 'favicon.ico', 'uploads', 'dashboard', 'register', 'settings', 'blog',
 ]);
 
 export function isReservedSlug(slug) {

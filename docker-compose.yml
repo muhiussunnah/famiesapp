@@ -1,0 +1,64 @@
+# Famies on Coolify: the Next.js app + its own PostgreSQL.
+#
+# Coolify → Project → New Resource → GitHub repo → Build Pack "Docker Compose".
+# Coolify fills every SERVICE_* variable itself (random passwords, the
+# public URL), so nobody has to create or copy a secret:
+#   SERVICE_PASSWORD_ADMIN      → the /admin login password (shown in Coolify → Environment Variables)
+#   SERVICE_PASSWORD_64_WRITERFY → the Writerify API token
+# Set the domain on the "app" service (e.g. https://famies.app).
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://famies.app}
+    environment:
+      - SERVICE_FQDN_APP_3000
+      - DATABASE_URL=postgres://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@db:5432/${POSTGRES_DB:-famies}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://famies.app}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-itsinjamul@gmail.com}
+      - ADMIN_PASSWORD=${SERVICE_PASSWORD_ADMIN}
+      - SESSION_SECRET=${SERVICE_PASSWORD_64_SESSION}
+      - WRITERFY_API_TOKEN=${SERVICE_PASSWORD_64_WRITERFY}
+      - CRON_SECRET=${SERVICE_PASSWORD_CRON}
+      - UPLOAD_DIR=/app/uploads
+      # Optional integrations — fill in Coolify when you want them.
+      - GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL:-}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY:-}
+      - GA4_PROPERTY_ID=${GA4_PROPERTY_ID:-}
+      - GSC_SITE_URL=${GSC_SITE_URL:-sc-domain:famies.app}
+      - INDEXNOW_KEY=${INDEXNOW_KEY:-}
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - SERPAPI_KEY_BACKUP=${SERPAPI_KEY_BACKUP:-}
+    volumes:
+      - famies-uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${SERVICE_USER_POSTGRES}
+      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
+      - POSTGRES_DB=${POSTGRES_DB:-famies}
+    volumes:
+      - famies-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  famies-uploads:
+  famies-db:

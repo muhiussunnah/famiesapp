@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/admin';
 export const dynamic = 'force-dynamic';
 
 /**
- * On-site content stats for the admin Dashboard (Supabase only — no
+ * On-site content stats for the admin Dashboard (database only — no
  * Google needed).
  *
  * GET → {

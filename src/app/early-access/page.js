@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { Sparkles, MapPin, User, Mail, Baby, Check, Loader2, ArrowRight, Send, Heart, Users, Camera, ArrowDown } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { submitForm } from '@/lib/forms';
 
 // --- Animated Counter Component ---
 function Counter({ value }) {
@@ -258,13 +258,13 @@ function ApplicationForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('early_access').insert([{
+      const { error } = await submitForm('early-access', {
         name: formData.name,
         municipality: formData.municipality,
         email: formData.email,
         children_age: formData.childrenAge,
         wants_feedback: formData.wantsFeedback
-      }]);
+      });
       if (error) throw error;
       setSuccess(true);
     } catch (error) {

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Apple, Play, Mail } from 'lucide-react';
-import { DEFAULT_MENUS } from '@/lib/menus';
+import { DEFAULT_MENUS } from '@/lib/menu-defaults';
 
 // Built-in footer texts; every one can be overridden in /admin/footer-settings.
 const DEFAULTS = {

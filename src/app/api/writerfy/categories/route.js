@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkWriterfyAuth } from '@/lib/writerfy-auth';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { getDb } from '@/lib/db';
 import { CATEGORIES } from '@/lib/site';
 import { slugify } from '@/lib/content-helpers';
 
@@ -19,7 +19,7 @@ export async function GET(req) {
 
   // Counts are a nice-to-have: on a DB hiccup Writerfy still gets the list.
   const counts = {};
-  const db = createAdminClient();
+  const db = getDb();
   if (db) {
     const { data } = await db.from('blog_posts').select('category').eq('status', 'published');
     for (const row of data ?? []) {

@@ -42,6 +42,8 @@ export const RESERVED_PATHS = [
   '/feed.xml',
   '/favicon.ico',
   '/indexnow-key',
+  '/uploads',
+  '/blog',
 ];
 
 export const SITE_HOST = (() => {

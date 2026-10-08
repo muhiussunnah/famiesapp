@@ -1,32 +1,27 @@
 /**
  * Enabled custom scripts (Google Analytics, Search Console verification,
- * Meta Pixel …) managed at /admin/header-scripts. RLS only exposes
- * enabled rows to the anon key.
+ * Meta Pixel …) managed at /admin/header-scripts.
  */
 import { cache } from 'react';
-import { createPublicClient } from '@/lib/supabase/public';
+import { cachedRead } from '@/lib/db/cached';
 
-export const getEnabledScripts = cache(async function getEnabledScripts() {
-  const supabase = createPublicClient({ tags: ['site-scripts'] });
-  if (!supabase) return [];
-
-  try {
-    const { data, error } = await supabase
+const loadScripts = cachedRead(
+  async (db) => {
+    const { data, error } = await db
       .from('site_scripts')
       .select('id, name, code, position, sort_order')
       .eq('enabled', true)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('[site-scripts] fetch error:', error.message);
-      return [];
-    }
+    if (error) throw new Error(error.message);
     return data ?? [];
-  } catch (err) {
-    console.error('[site-scripts] unexpected error:', err?.message || err);
-    return [];
-  }
+  },
+  ['site-scripts'],
+  { tags: ['site-scripts'] }
+);
+
+export const getEnabledScripts = cache(async function getEnabledScripts() {
+  return (await loadScripts()) ?? [];
 });
 
 export function groupByPosition(scripts) {
