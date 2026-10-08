@@ -9,6 +9,12 @@
   --background: #ffffff;
   --foreground: #0c0a13;
 
+  /* Tailwind primary / secondary (space-separated RGB so opacity
+     modifiers work). Overridden by /admin/theme via buildThemeCSS(). */
+  --color-primary-rgb: 255 143 175;
+  --color-primary-hover-rgb: 255 111 153;
+  --color-secondary-rgb: 204 250 214;
+
   /* Brand, only these two colors */
   --brand-pink: #FF8FAF;
   --brand-pink-deep: #ff6f99;

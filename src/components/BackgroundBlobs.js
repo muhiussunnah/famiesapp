@@ -1,7 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { LIVE } from '@/lib/siteConfig';
 
 /**
  * Fixed-position animated blobs that sit behind all content.
@@ -11,7 +9,6 @@ import { LIVE } from '@/lib/siteConfig';
  * Colors stay within brand: #FF8FAF + #CCFAD6 only.
  */
 export default function BackgroundBlobs() {
-  const pathname = usePathname();
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -26,9 +23,6 @@ export default function BackgroundBlobs() {
       cancelAnimationFrame(raf);
     };
   }, []);
-
-  // Coming Soon mode: skip on the homepage (landing has its own bg).
-  if (!LIVE && pathname === '/') return null;
 
   // Parallax strengths (different per blob for depth)
   const y1 = scrollY * -0.12;

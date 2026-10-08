@@ -5,7 +5,25 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Apple, Play, PlayCircle, X, Sparkles, MapPin, Star } from 'lucide-react';
 
-export default function Hero() {
+const DEFAULT_APP_STORE_URL = 'https://apps.apple.com/se/app/famies/id6450005701';
+const DEFAULT_GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.famapdirectory.apps&hl=en';
+
+/** "Vill du veta vad *nära dig*" → the starred words get the brand gradient. */
+function renderTitle(title) {
+  return title.split(/(\*[^*]+\*)/g).map((part, i) =>
+    part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
+      <span key={i} className="text-brand-gradient">{part.slice(1, -1)}</span>
+    ) : (
+      part
+    )
+  );
+}
+
+/**
+ * Homepage hero. eyebrow / title / subtitle come from /admin/homepage;
+ * when empty, the original designed copy is shown.
+ */
+export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlayUrl } = {}) {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   return (
@@ -31,31 +49,41 @@ export default function Hero() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
             </span>
             <span className="text-xs font-bold uppercase tracking-wider text-ink-700 dark:text-ink-100">
-              Byggd av föräldrar, för föräldrar
+              {eyebrow || 'Byggd av föräldrar, för föräldrar'}
             </span>
           </motion.div>
 
           {/* Headline, curiosity-driven question */}
           <h1 className="text-[2.4rem] sm:text-[3.25rem] lg:text-[4rem] leading-[1.05] font-black tracking-tight text-ink-900 dark:text-white mb-6">
-            <span className="block">Vill du veta vad</span>
-            <span className="block">
-              familjer <span className="text-brand-gradient">nära dig</span>
-            </span>
-            <span className="block">hittar på?</span>
+            {title ? (
+              renderTitle(title)
+            ) : (
+              <>
+                <span className="block">Vill du veta vad</span>
+                <span className="block">
+                  familjer <span className="text-brand-gradient">nära dig</span>
+                </span>
+                <span className="block">hittar på?</span>
+              </>
+            )}
           </h1>
 
           {/* Subtitle, what + by whom */}
           <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-            <span className="block text-ink-900 dark:text-white font-semibold">
-              Aktiviteter, event och skoj. Tillsammans.
-            </span>
-            Delat av familjer i närheten.
+            {subtitle || (
+              <>
+                <span className="block text-ink-900 dark:text-white font-semibold">
+                  Aktiviteter, event och skoj. Tillsammans.
+                </span>
+                Delat av familjer i närheten.
+              </>
+            )}
           </p>
 
           {/* CTAs, native store buttons, the real conversion */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
             <Link
-              href="https://apps.apple.com/se/app/famies/id6450005701"
+              href={appStoreUrl || DEFAULT_APP_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="press group flex items-center gap-3 px-6 py-4 rounded-2xl bg-ink-900 dark:bg-white text-white dark:text-ink-900 font-bold shadow-soft hover:shadow-pink transition-all"
@@ -68,7 +96,7 @@ export default function Hero() {
             </Link>
 
             <Link
-              href="https://play.google.com/store/apps/details?id=com.famapdirectory.apps&hl=en"
+              href={googlePlayUrl || DEFAULT_GOOGLE_PLAY_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="press group flex items-center gap-3 px-6 py-4 rounded-2xl bg-white dark:bg-ink-900 border border-ink-100 dark:border-ink-700 text-ink-900 dark:text-white font-bold shadow-soft hover:shadow-mint transition-all"

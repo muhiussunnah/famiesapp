@@ -6,9 +6,10 @@ export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   
-  // ✅ FIX: এখানে '/dashboard' সরিয়ে '/' (Homepage) করে দিলাম
-  // এখন Google লগিন/সাইনআপ শেষে সোজা হোমপেজে যাবে
-  const next = searchParams.get('next') ?? '/';
+  // Supabase email links (password reset, invite) land here; only
+  // same-site relative paths are allowed as the destination.
+  const nextParam = searchParams.get('next') ?? '/admin';
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/admin';
 
   if (code) {
     const cookieStore = await cookies();

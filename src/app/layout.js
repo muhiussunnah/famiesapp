@@ -1,14 +1,16 @@
-import localFont from "next/font/local"; // 👈 Google Font সরিয়ে Local Font আনা হলো
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ScrollToTop from "@/components/ScrollToTop";
+import LayoutShell from "@/components/LayoutShell";
 import { Toaster } from 'react-hot-toast';
-import ProgressBar from "@/components/ProgressBar";
-import BackgroundBlobs from "@/components/BackgroundBlobs";
+import { getSiteContent, isComingSoon } from "@/lib/site-content";
+import { getMenus } from "@/lib/menus";
+import { getEnabledScripts, groupByPosition } from "@/lib/site-scripts";
+import { renderHeadScript, renderBodySnippet, splitHeadSnippets } from "@/lib/render-head-script";
+import { buildThemeCSS } from "@/lib/theme-colors";
+import { SITE_URL, SITE_NAME } from "@/lib/site";
 
-// ✅ Satoshi ফন্ট কনফিগারেশন (তোমার ফোল্ডারের .otf ফাইল অনুযায়ী)
+// Satoshi, served from the local .otf files
 const satoshi = localFont({
   src: [
     {
@@ -37,12 +39,12 @@ const satoshi = localFont({
       style: 'normal',
     },
   ],
-  variable: "--font-satoshi", // 👈 এই ভেরিয়েবলটা আমরা Tailwind-এ ব্যবহার করবো
+  variable: "--font-satoshi", // used by Tailwind's font-sans
   display: "swap",
 });
 
 export const metadata = {
-  metadataBase: new URL('https://www.famies.app'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Famies – Familjeaktiviteter nära dig',
     template: '%s · Famies',
@@ -54,12 +56,16 @@ export const metadata = {
     'vad göra med barn', 'utflykter barn', 'familjeliv', 'föräldra-app', 'Famies',
   ],
   icons: { icon: '/logo-black.webp', apple: '/logo-black.webp' },
+  // No canonical here: it would be inherited by every page. Pages set their own.
+  alternates: {
+    types: { 'application/rss+xml': [{ url: '/feed.xml', title: 'Famies Inspiration' }] },
+  },
   openGraph: {
     title: 'Famies – Familjeaktiviteter nära dig',
     description:
       'Vad tipsar andra familjer nära dig om? Upptäck aktiviteter, event och nya favoriter. 💛',
-    url: 'https://www.famies.app',
-    siteName: 'Famies',
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: 'sv_SE',
     type: 'website',
     images: [{ url: '/logo-black.webp', width: 512, height: 512, alt: 'Famies' }],
@@ -73,23 +79,66 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+const ORGANIZATION_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/logo-black.webp`,
+      email: 'support@famies.app',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: SITE_NAME,
+      inLanguage: 'sv-SE',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+    },
+  ],
+};
+
+export default async function RootLayout({ children }) {
+  const [siteContent, menus, scripts] = await Promise.all([
+    getSiteContent(),   // texts, Coming Soon switch, theme, custom CSS, footer
+    getMenus(),         // header + footer menus
+    getEnabledScripts(), // admin-managed GA / verification / pixels
+  ]);
+  const { head, bodyStart, bodyEnd } = groupByPosition(scripts);
+  const themeCSS = buildThemeCSS(siteContent.settings);
+  const customCSS = siteContent.settings.global_custom_css;
+
   return (
     <html lang="sv" suppressHydrationWarning>
-      {/* ✅ বডিতে satoshi ভেরিয়েবল এবং font-sans ক্লাস দেওয়া হলো */}
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }}
+        />
+        {/* Admin-managed <head> snippets, each rendered as a real head element */}
+        {head.flatMap((s) =>
+          splitHeadSnippets(s.code).map((code, i) => renderHeadScript(code, `${s.id}-${i}`))
+        )}
+        {/* Admin theme colors, then global custom CSS last so it wins */}
+        {themeCSS && <style data-site-theme="" dangerouslySetInnerHTML={{ __html: themeCSS }} />}
+        {customCSS && <style data-site-custom-css="" dangerouslySetInnerHTML={{ __html: customCSS }} />}
+      </head>
       <body className={`${satoshi.variable} font-sans antialiased relative`}>
+        {bodyStart.flatMap((s) => renderBodySnippet(s.code, s.id))}
         <Providers>
-          <BackgroundBlobs />
-          <ProgressBar />
-          <Navbar />
-          <main className="min-h-screen relative">
+          <LayoutShell
+            comingSoon={isComingSoon(siteContent.settings)}
+            menus={menus}
+            siteContent={siteContent}
+          >
             {children}
-          </main>
-          <Footer />
-          <ScrollToTop />
-          
-          {/* ✅ প্রিমিয়াম গ্লসি টোস্ট */}
-          <Toaster 
+          </LayoutShell>
+
+          {/* Glossy toast */}
+          <Toaster
             position="top-center"
             reverseOrder={false}
             toastOptions={{
@@ -114,6 +163,7 @@ export default function RootLayout({ children }) {
             }}
           />
         </Providers>
+        {bodyEnd.flatMap((s) => renderBodySnippet(s.code, s.id))}
       </body>
     </html>
   );

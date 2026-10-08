@@ -1,54 +1,18 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, ArrowLeft, Calendar, Clock, ChevronRight, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { ArrowRight, ArrowLeft, Calendar, Clock, ChevronRight } from 'lucide-react';
 
-export default function BlogSlider() {
-  const [posts, setPosts] = useState([]);
+const formatDate = (post) =>
+  new Date(post.published_at || post.scheduled_at || post.created_at).toLocaleDateString('sv-SE');
+
+// `posts` are the latest live articles, loaded on the server by the homepage.
+export default function BlogSlider({ posts = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const autoPlayRef = useRef(null);
+  const [paused, setPaused] = useState(false);
 
-  // ১. ডাটা ফেচ করা
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(9); 
-
-      if (!error && data) {
-        setPosts(data);
-      }
-      setLoading(false);
-    };
-
-    fetchPosts();
-  }, []);
-
-  // ২. অটো প্লে (৩.৫ সেকেন্ড পর পর)
-  useEffect(() => {
-    startAutoPlay();
-    return () => stopAutoPlay();
-  }, [currentIndex, posts.length]);
-
-  const startAutoPlay = () => {
-    stopAutoPlay();
-    if (posts.length > 3) {
-      autoPlayRef.current = setInterval(() => {
-        nextSlide();
-      }, 3500);
-    }
-  };
-
-  const stopAutoPlay = () => {
-    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-  };
-
-  // ৩. স্লাইড লজিক
+  // Slide logic
   const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 768;
   const visibleCards = isDesktop ? 3 : 1;
   const maxIndex = posts.length > visibleCards ? posts.length - visibleCards : 0;
@@ -61,20 +25,22 @@ export default function BlogSlider() {
     setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
   };
 
-  const getReadTime = (content) => {
-    const text = content?.replace(/<[^>]+>/g, '') || '';
-    const words = text.split(/\s+/).length;
-    return Math.ceil(words / 200) + " min";
-  };
+  // Auto-play every 3.5 s, paused while hovered
+  useEffect(() => {
+    if (paused || posts.length <= 3) return;
+    const id = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 3500);
+    return () => clearInterval(id);
+  }, [paused, posts.length, maxIndex]);
 
-  if (loading) return <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary" size={32}/></div>;
   if (posts.length === 0) return null;
 
   return (
     <section
       className="py-20 md:py-28 overflow-hidden relative section"
-      onMouseEnter={stopAutoPlay}
-      onMouseLeave={startAutoPlay}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
@@ -134,10 +100,10 @@ export default function BlogSlider() {
                   
                   {/* Image */}
                   <div className="relative h-64 overflow-hidden">
-                    {post.image_url ? (
-                      <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
+                    {post.featured_image ? (
+                      <img src={post.featured_image} alt={post.title} loading="lazy" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                     ) : (
-                      <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">No Image</div>
+                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/50" />
                     )}
                     <div className="absolute top-4 left-4 bg-white/95 dark:bg-black/95 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-primary shadow-lg">
                       {post.category || 'Artikel'}
@@ -147,22 +113,19 @@ export default function BlogSlider() {
                   {/* Content */}
                   <div className="p-7 flex flex-col flex-grow">
                     <div className="flex items-center gap-4 text-xs text-gray-500 font-bold uppercase tracking-wide mb-4">
-                      <span className="flex items-center gap-1.5"><Calendar size={14} className="text-primary"/> {new Date(post.created_at).toLocaleDateString('sv-SE')}</span>
-                      <span className="flex items-center gap-1.5"><Clock size={14} className="text-primary"/> {getReadTime(post.content)}</span>
+                      <span className="flex items-center gap-1.5"><Calendar size={14} className="text-primary"/> {formatDate(post)}</span>
+                      <span className="flex items-center gap-1.5"><Clock size={14} className="text-primary"/> {post.read_time || '5 min'}</span>
                     </div>
 
                     <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors leading-tight">
-                      <Link href={`/inspiration/${post.slug}`}>{post.title}</Link>
+                      <Link href={post.slug}>{post.title}</Link>
                     </h3>
-                    
-                    {/* ✅ FIX: 200 Characters Limit + line-clamp-2 ensures roughly 2 lines */}
-                    <div 
-                      className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-6 flex-grow leading-relaxed font-medium"
-                      dangerouslySetInnerHTML={{ __html: post.content?.substring(0, 200).replace(/<[^>]+>/g, '') + "..." }} 
-                    />
 
-                    {/* ✅ FIX: Button Text Swedish */}
-                    <Link href={`/inspiration/${post.slug}`} className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-all group-hover:gap-3 mt-auto">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-6 flex-grow leading-relaxed font-medium">
+                      {post.excerpt}
+                    </p>
+
+                    <Link href={post.slug} className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-all group-hover:gap-3 mt-auto">
                       Läs mer <ArrowRight size={16} />
                     </Link>
                   </div>

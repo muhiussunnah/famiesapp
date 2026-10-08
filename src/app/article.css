@@ -1,0 +1,254 @@
+/* ============================================================
+   Article typography for post HTML (admin editor + Writerfy).
+   Scoped to .rich-content so it never leaks into the site chrome.
+   Inline styles in the post HTML still win (they are the author's
+   intentional design: callouts, hero cards, image sizing).
+   ============================================================ */
+
+.rich-content {
+  color: var(--ink-700);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+@media (min-width: 768px) {
+  .rich-content { font-size: 1.125rem; }
+}
+
+.rich-content > :first-child { margin-top: 0; }
+
+.rich-content h1,
+.rich-content h2,
+.rich-content h3,
+.rich-content h4 {
+  color: var(--ink-900);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  scroll-margin-top: 7rem;
+}
+.rich-content h1 { font-size: 2rem; margin: 2.5rem 0 1rem; }
+.rich-content h2 { font-size: 1.75rem; margin: 2.75rem 0 1rem; }
+.rich-content h3 { font-size: 1.375rem; margin: 2rem 0 0.75rem; font-weight: 800; }
+.rich-content h4 { font-size: 1.125rem; margin: 1.5rem 0 0.5rem; font-weight: 800; }
+@media (min-width: 768px) {
+  .rich-content h2 { font-size: 2.125rem; }
+  .rich-content h3 { font-size: 1.5rem; }
+}
+
+.rich-content p { margin: 0 0 1.25rem; }
+.rich-content ul,
+.rich-content ol { margin: 0 0 1.25rem; padding-left: 1.4rem; }
+.rich-content ul { list-style: disc; }
+.rich-content ol { list-style: decimal; }
+.rich-content li { margin-bottom: 0.4rem; }
+.rich-content li::marker { color: var(--brand-pink-deep); font-weight: 700; }
+
+.rich-content strong,
+.rich-content b { color: var(--ink-900); font-weight: 700; }
+
+.rich-content a {
+  color: var(--brand-pink-deep);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgb(var(--color-primary-rgb, 255 143 175) / 0.4);
+  transition: text-decoration-color 0.15s ease;
+}
+.rich-content a:hover { text-decoration-color: currentColor; }
+
+.rich-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2rem auto;
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-soft);
+}
+.rich-content figure { margin: 2rem 0; }
+.rich-content figure img { margin-bottom: 0.75rem; }
+.rich-content figcaption { text-align: center; font-size: 0.875rem; color: var(--ink-500); }
+
+.rich-content iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 2rem auto;
+  border-radius: 1.25rem;
+}
+.rich-content iframe[src*="youtube"],
+.rich-content iframe[src*="vimeo"] { aspect-ratio: 16 / 9; height: auto; }
+
+.rich-content blockquote {
+  margin: 2rem 0;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--brand-pink);
+  border-radius: 0 1.25rem 1.25rem 0;
+  background: var(--brand-pink-soft);
+  color: var(--ink-900);
+  font-weight: 500;
+}
+.rich-content blockquote p:last-child { margin-bottom: 0; }
+
+.rich-content code {
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.4rem;
+  background: var(--ink-100);
+  font-size: 0.9em;
+}
+.rich-content pre {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: var(--ink-900);
+  color: #f7f4ff;
+  overflow-x: auto;
+}
+.rich-content pre code { background: none; padding: 0; color: inherit; }
+
+.rich-content hr {
+  margin: 2.5rem auto;
+  width: 5rem;
+  border: 0;
+  border-top: 3px dotted var(--brand-pink);
+}
+
+/* Tables */
+.rich-content table {
+  width: 100%;
+  margin: 1.75rem 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9375rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.rich-content th {
+  background: var(--brand-pink-soft);
+  color: var(--ink-900);
+  font-weight: 800;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+}
+.rich-content td {
+  padding: 0.7rem 0.9rem;
+  border-top: 1px solid var(--surface-border);
+  vertical-align: top;
+}
+.rich-content tbody tr:nth-child(even) td { background: rgba(204, 250, 214, 0.18); }
+@media (max-width: 640px) {
+  .rich-content table { font-size: 0.8125rem; }
+  .rich-content th,
+  .rich-content td { padding: 0.5rem; word-break: break-word; }
+}
+
+/* ============================================================
+   Writerfy product / comparison markup.
+   Writerfy uses two prefixes on purpose: "writerfy-" (table)
+   and "writerify-" (product blocks).
+   ============================================================ */
+.rich-content .writerfy-section-heading { text-align: center; margin: 2.25rem 0 1rem; }
+
+.rich-content table.writerfy-amazon-table { font-size: 0.85rem; box-shadow: var(--shadow-soft); }
+.rich-content .writerfy-amazon-table thead th {
+  background: linear-gradient(135deg, var(--brand-pink-deep), var(--brand-pink));
+  color: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.rich-content .writerfy-amazon-table td { vertical-align: middle; padding: 0.45rem 0.7rem; }
+.rich-content .writerfy-table-cell-product { width: 78px; text-align: center; }
+.rich-content .writerfy-table-cell-product img {
+  width: 56px;
+  margin: 0 auto;
+  border-radius: 0.4rem;
+  box-shadow: none;
+  transition: transform 0.25s ease;
+}
+.rich-content .writerfy-table-cell-product img:hover { transform: scale(1.08); }
+.rich-content .writerfy-table-cell-name { font-weight: 700; line-height: 1.35; }
+.rich-content .writerfy-table-cell-rating { white-space: nowrap; color: #f59e0b; font-weight: 700; }
+.rich-content .writerfy-table-cell-buy { text-align: center; width: 130px; }
+.rich-content .writerfy-table-cell-buy a,
+.rich-content a.writerify-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ff9900 0%, #ff6b00 100%);
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.rich-content .writerfy-table-cell-buy a { padding: 0.45rem 0.85rem; font-size: 0.7rem; }
+.rich-content a.writerify-cta { margin: 1.25rem auto 0.5rem; padding: 0.85rem 2.25rem; font-size: 0.95rem; }
+.rich-content .writerfy-table-cell-buy a:hover,
+.rich-content a.writerify-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 107, 0, 0.45); color: #fff; }
+.rich-content a.writerify-cta svg { width: 16px; height: 16px; flex-shrink: 0; }
+.rich-content p:has(> a.writerify-cta) { text-align: center; }
+
+.rich-content .writerfy-table-badge {
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-pink-deep), var(--brand-pink));
+}
+.rich-content .writerfy-table-badge.wf-tb-editors,
+.rich-content .writerify-badge-editors { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
+.rich-content .writerfy-table-badge.wf-tb-top,
+.rich-content .writerify-badge-top { background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); }
+.rich-content .writerfy-table-badge.wf-tb-budget,
+.rich-content .writerify-badge-budget { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+
+.rich-content .writerify-product-block { margin: 2.5rem 0; padding: 1.25rem 0; text-align: center; }
+.rich-content .writerify-product-block p { text-align: left; }
+.rich-content .writerify-badge {
+  display: table;
+  margin: 0 auto 1rem;
+  padding: 0.45rem 1.4rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(135deg, var(--brand-pink-deep), var(--brand-pink));
+}
+.rich-content .writerify-product-heading {
+  text-align: center;
+  margin: 0.5rem auto 1rem;
+  color: var(--brand-pink-deep);
+}
+.rich-content a.writerify-product-image {
+  display: block;
+  max-width: 280px;
+  margin: 1.25rem auto;
+  text-decoration: none;
+}
+.rich-content a.writerify-product-image img {
+  margin: 0 auto;
+  border-radius: 1rem;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rich-content a.writerify-product-image:hover img { transform: scale(1.08); }
+.rich-content .writerify-product-block h4 {
+  text-align: left;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-pink-deep);
+}

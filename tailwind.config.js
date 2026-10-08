@@ -13,22 +13,24 @@ export default {
         display: ['var(--font-satoshi)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Brand (only two)
+        // Brand (only two). DEFAULT / 500 / secondary DEFAULT read CSS
+        // variables so /admin/theme can recolor the site without a deploy
+        // (defaults live in globals.css :root).
         primary: {
-          DEFAULT: '#FF8FAF',
+          DEFAULT: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
           50:  '#fff4f8',
           100: '#ffe1ec',
           200: '#ffc6d7',
           300: '#ffa8c0',
           400: '#ff8faf',
-          500: '#ff6f99',
+          500: 'rgb(var(--color-primary-hover-rgb) / <alpha-value>)',
           600: '#ef4f7f',
           700: '#c73d67',
           800: '#9a2e50',
           900: '#6e223a',
         },
         secondary: {
-          DEFAULT: '#CCFAD6',
+          DEFAULT: 'rgb(var(--color-secondary-rgb) / <alpha-value>)',
           50:  '#f4fef6',
           100: '#e9fdef',
           200: '#ccfad6',

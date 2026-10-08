@@ -97,7 +97,7 @@ function StoreBadge({ href, label, store, icon }) {
   );
 }
 
-export default function ComingSoon() {
+export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl = GOOGLE_PLAY_URL } = {}) {
   return (
     <main
       className="fixed inset-0 z-[200] min-h-screen w-full overflow-hidden flex flex-col items-center justify-between text-white"
@@ -217,13 +217,13 @@ export default function ComingSoon() {
           className="mt-7 sm:mt-9 w-full max-w-md flex flex-col sm:flex-row items-stretch justify-center gap-3 sm:gap-4"
         >
           <StoreBadge
-            href={GOOGLE_PLAY_URL}
+            href={googlePlayUrl}
             label="Ladda ner på"
             store="Google Play"
             icon={<GooglePlayIcon className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />}
           />
           <StoreBadge
-            href={APP_STORE_URL}
+            href={appStoreUrl}
             label="Ladda ner på"
             store="App Store"
             icon={<AppleIcon className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-white" />}
