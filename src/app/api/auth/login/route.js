@@ -21,7 +21,8 @@ export async function POST(req) {
 
   const body = await req.json().catch(() => ({}));
   const email = typeof body.email === 'string' ? body.email.trim() : '';
-  const password = typeof body.password === 'string' ? body.password : '';
+  // Trim: a password copied from Coolify often carries a stray space/newline.
+  const password = typeof body.password === 'string' ? body.password.trim() : '';
 
   if (!checkCredentials(email, password, isAdminEmail)) {
     // Slow down guessing a little.

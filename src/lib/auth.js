@@ -42,7 +42,7 @@ export function isAuthConfigured() {
 export function checkCredentials(email, password, isAdminEmail) {
   if (!isAuthConfigured()) return false;
   const emailOk = isAdminEmail(email);
-  const passwordOk = safeEqual(password || '', process.env.ADMIN_PASSWORD);
+  const passwordOk = safeEqual(password || '', process.env.ADMIN_PASSWORD.trim());
   return emailOk && passwordOk;
 }
 
