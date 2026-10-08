@@ -15,7 +15,10 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+# webpack instead of Turbopack: Turbopack's production build stalled on the
+# 2 vCPU / 4 GB server; webpack is slower on big machines but reliable here.
+# The heap cap leaves room for the other sites running on the same server.
+RUN NODE_OPTIONS=--max-old-space-size=1800 npx next build --webpack
 
 FROM node:22-alpine AS runner
 WORKDIR /app
