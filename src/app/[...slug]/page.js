@@ -12,6 +12,7 @@ import { getNofollowRules, applyNofollowRules } from '@/lib/external-links';
 import { getSiteContent, setting } from '@/lib/site-content';
 import { addHeadingIds, splitAtFirstH2, classifyTableBadges } from '@/lib/article-html';
 import { resolveFeaturedImage, dedupeProductHeadings, normalizeSlug } from '@/lib/content-helpers';
+import { schemaNodes, isArticleNode } from '@/lib/writerfy';
 import { SITE_URL, SITE_NAME, BLOG_PATH, absoluteUrl } from '@/lib/site';
 
 /**
@@ -74,10 +75,19 @@ export async function generateMetadata({ params }) {
   };
 }
 
+/**
+ * JSON-LD for the post. custom_schema containing an Article/BlogPosting
+ * replaces the default schema entirely; any other custom nodes (FAQPage,
+ * Review, ItemList — e.g. from Writerify) are added next to the default.
+ */
 function buildSchema(post, image) {
+  let extra = [];
   if (post.custom_schema?.trim()) {
     try {
-      return JSON.stringify(JSON.parse(post.custom_schema));
+      const custom = JSON.parse(post.custom_schema);
+      const nodes = schemaNodes(custom);
+      if (nodes.some(isArticleNode)) return JSON.stringify(custom);
+      extra = nodes.map(({ '@context': _ctx, ...rest }) => rest);
     } catch {
       // Invalid custom JSON-LD — fall back to the default schema.
     }
@@ -86,6 +96,7 @@ function buildSchema(post, image) {
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
+      ...extra,
       {
         '@type': 'BlogPosting',
         headline: post.meta_title || post.title,

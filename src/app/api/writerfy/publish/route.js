@@ -8,17 +8,20 @@ import {
   normalizeSlug, slugify, plainText, autoExcerpt, truncate, readTime,
   resolveFeaturedImage, dedupeProductHeadings,
 } from '@/lib/content-helpers';
-import { resolveCategory, isReservedSlug } from '@/lib/writerfy';
+import { resolveCategory, isReservedSlug, readPublishFields } from '@/lib/writerfy';
 import { absoluteUrl, DEFAULT_AUTHOR_NAME, DEFAULT_AUTHOR_ROLE } from '@/lib/site';
 
 /**
  * Writerfy ingestion endpoint — same contract as mushroomidentifiers.com.
+ * Also served at /api/writerify/publish (the spelling Writerify's
+ * "Custom API" form uses).
  *
  * Token-authenticated (Authorization: Bearer $WRITERFY_API_TOKEN) so the
  * Writerify desktop app can create or update articles in the same
  * blog_posts table the admin panel writes to. Accepts Markdown (default)
  * or HTML (`content_format: "html"`); Markdown is converted server-side and
- * everything is sanitised before it is stored.
+ * everything is sanitised before it is stored. Metadata may come as flat
+ * fields or inside Writerify's `frontmatter` (see readPublishFields).
  *
  * GET  → health check { ok: true, service: 'writerfy-publish' }
  * POST → { id, slug, url, status, updated }   (409 if the slug exists,
@@ -81,8 +84,9 @@ export async function POST(req) {
     return NextResponse.json({ error: `slug "${slug}" is reserved by the website` }, { status: 400 });
   }
 
-  const excerpt = truncate(body.excerpt?.trim() || autoExcerpt(content), 500);
-  const status = body.status === 'published' ? 'published' : 'draft';
+  const fields = readPublishFields(body);
+  const excerpt = truncate(fields.excerpt || autoExcerpt(content), 500);
+  const status = fields.status;
   const now = new Date().toISOString();
 
   const row = {
@@ -90,17 +94,17 @@ export async function POST(req) {
     slug,
     excerpt,
     content,
-    featured_image: resolveFeaturedImage(body.featured_image, content),
-    category: resolveCategory(body.category),
+    featured_image: resolveFeaturedImage(fields.featured_image, content),
+    category: resolveCategory(fields.category),
     read_time: readTime(content),
     status,
-    author_name: body.author_name || DEFAULT_AUTHOR_NAME,
-    author_role: body.author_role || DEFAULT_AUTHOR_ROLE,
-    meta_title: truncate(body.meta_title?.trim() || body.title.trim(), 60),
-    meta_description: truncate(body.meta_description?.trim() || plainText(excerpt), 160),
+    author_name: fields.author_name || DEFAULT_AUTHOR_NAME,
+    author_role: fields.author_role || DEFAULT_AUTHOR_ROLE,
+    meta_title: truncate(fields.meta_title || body.title.trim(), 60),
+    meta_description: truncate(fields.meta_description || plainText(excerpt), 160),
     layout: normaliseLayout(body.layout),
     custom_css: body.custom_css || null,
-    custom_schema: body.custom_schema || null,
+    custom_schema: fields.custom_schema || null,
     scheduled_at: null,
     published_at: status === 'published' ? now : null,
   };

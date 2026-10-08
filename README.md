@@ -24,24 +24,35 @@ The Coming Soon landing (logo + App Store / Google Play badges) is kept in `src/
 
 ## Publishing from Writerify (Writerfy API)
 
-In Writerify → Sites → add a **Next.js site**:
+In Writerify → Sites → add a Next.js site:
 
-- URL: `https://famies.app`
-- Token: the value of `WRITERFY_API_TOKEN`
+| Field | Value |
+|---|---|
+| SITE NAME | Famies |
+| PUBLISHING MODE | Custom API |
+| API ENDPOINT URL | `https://famies.app/api/writerify/publish` |
+| API TOKEN (BEARER) | the value of `WRITERFY_API_TOKEN` (same value in Vercel env vars) |
+| IMAGE UPLOAD URL | `https://famies.app/api/writerify/upload-image` |
+| CATEGORIES ENDPOINT URL | `https://famies.app/api/writerify/categories` |
+| DRAFTS ENDPOINT URL | `https://famies.app/api/writerify/drafts` |
+| SCHEDULE ENDPOINT URL | `https://famies.app/api/writerify/schedule` |
+| SITEMAP URL | `https://famies.app/sitemap.xml` |
+
+The `/api/writerfy/*` spelling (as on mushroomidentifiers.com) serves the same handlers.
 
 | Endpoint | Method | Purpose |
 |---|---|---|
-| `/api/writerfy/publish` | GET | Connection test |
-| `/api/writerfy/publish` | POST | Create/update an article (Markdown or HTML; `?overwrite=true` to replace an existing slug) |
-| `/api/writerfy/categories` | GET | Famies categories (Swedish) |
-| `/api/writerfy/drafts` | GET | Draft list for scheduling |
-| `/api/writerfy/schedule` | POST | `{ id, scheduledAt }` — publish a draft at a future time |
-| `/api/writerfy/upload-image` | POST | Multipart image upload (Vercel Blob if configured, else Supabase Storage) |
+| `/api/writerify/publish/health` | GET | "Test connection" — 200 only if the token is right and the database is configured |
+| `/api/writerify/publish` | POST | Create/update an article (Markdown or HTML; Writerify's `frontmatter` featuredImage / authorName / schemaJsonLd are used; `?overwrite=true` to replace an existing slug) |
+| `/api/writerify/categories` | GET | Famies categories (Swedish) |
+| `/api/writerify/drafts` | GET | Draft list for scheduling |
+| `/api/writerify/schedule` | POST | `{ id, scheduledAt }` — publish a draft at a future time |
+| `/api/writerify/upload-image` | POST | Multipart image upload (Vercel Blob if `BLOB_READ_WRITE_TOKEN` is set, else Supabase Storage bucket `images`) |
 
 All requests need `Authorization: Bearer <WRITERFY_API_TOKEN>`. Incoming HTML is sanitised (scripts, event handlers and `javascript:` links are removed).
 
 ```bash
-curl https://famies.app/api/writerfy/publish -H "Authorization: Bearer $WRITERFY_API_TOKEN"
+curl https://famies.app/api/writerify/publish/health -H "Authorization: Bearer $WRITERFY_API_TOKEN"
 ```
 
 ## Development
