@@ -38,6 +38,6 @@ RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
 
 USER nextjs
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=5s --timeout=3s --start-period=60s --retries=6 \
   CMD wget -qO- http://127.0.0.1:3000/api/health >/dev/null 2>&1 || exit 1
 CMD ["sh", "-c", "node scripts/migrate.mjs && exec node server.js"]

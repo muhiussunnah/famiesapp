@@ -38,10 +38,12 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health >/dev/null 2>&1 || exit 1"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 40s
+      # Traefik only routes to a healthy container, so check often: after a
+      # deploy the new container is marked healthy within ~5s, not ~30s.
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 60s
     restart: unless-stopped
 
   db:
