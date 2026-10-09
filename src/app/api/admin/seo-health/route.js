@@ -30,7 +30,7 @@ import {
  *                                    favicon, security headers, HTTPS)
  *
  * The page calls these in sequence and combines the results client-side,
- * so no single request runs long enough to hit the Vercel time limit.
+ * so no single request runs long enough to hit a proxy time limit.
  */
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -742,7 +742,7 @@ async function globalChecks(db) {
     const res = await timed(`http://${SITE_HOST}/`, { redirect: 'manual' });
     const loc = res.headers.get('location') || '';
     const ok = res.status >= 300 && res.status < 400 && /^https:\/\//i.test(loc);
-    push('http-redirects', 'critical', ok, ok ? `http:// redirects to HTTPS (${res.status})` : `http://${SITE_HOST}/ does not redirect to HTTPS (status ${res.status})`, 'Redirect all HTTP traffic to HTTPS (Vercel does this automatically for its domains)');
+    push('http-redirects', 'critical', ok, ok ? `http:// redirects to HTTPS (${res.status})` : `http://${SITE_HOST}/ does not redirect to HTTPS (status ${res.status})`, 'Redirect all HTTP traffic to HTTPS (Coolify: Domains → Redirect HTTP to HTTPS)');
   } catch {
     push('http-redirects', 'info', false, 'Could not check the HTTP → HTTPS redirect', 'Redirect all HTTP traffic to HTTPS');
   }

@@ -3,12 +3,15 @@
  * submissions (sent with keyLocation: https://famies.app/indexnow-key by
  * /api/admin/indexing-report), so no static <key>.txt file is needed.
  *
- * Returns the INDEXNOW_KEY env var as text/plain, or 404 when it is unset.
+ * Returns the IndexNow key (INDEXNOW_KEY, or one derived from SESSION_SECRET)
+ * as text/plain, or 404 when neither is available.
  */
+import { indexNowKey } from '@/lib/indexnow';
+
 export const dynamic = 'force-dynamic';
 
 export function GET() {
-  const key = (process.env.INDEXNOW_KEY || '').trim();
+  const key = indexNowKey();
   if (!key) {
     return new Response('Not found', {
       status: 404,

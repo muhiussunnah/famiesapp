@@ -187,7 +187,7 @@ function NotConfigured({ vars, children }) {
             {i < vars.length - 1 ? ', ' : ''}
           </span>
         ))}{' '}
-        in Vercel env.
+        in Coolify → famiesapp → Environment Variables.
       </p>
       {children}
     </div>
@@ -558,10 +558,10 @@ export default function IndexingReportPage() {
               <code className="rounded bg-ink-50 px-1 font-mono text-[12px]">{config.google.property}</code> property.
             </li>
             <li>
-              Vercel → Settings → Environment Variables: <code className="font-mono text-[12px]">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> = <code className="font-mono text-[12px]">client_email</code>,{' '}
+              Coolify → famiesapp → Environment Variables: <code className="font-mono text-[12px]">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> = <code className="font-mono text-[12px]">client_email</code>,{' '}
               <code className="font-mono text-[12px]">GOOGLE_PRIVATE_KEY</code> = <code className="font-mono text-[12px]">private_key</code> from the JSON file. Optional:{' '}
               <code className="font-mono text-[12px]">GSC_SITE_URL</code> (default <code className="font-mono text-[12px]">sc-domain:famies.app</code>; use{' '}
-              <code className="font-mono text-[12px]">https://famies.app/</code> for a URL-prefix property). Redeploy.
+              <code className="font-mono text-[12px]">https://famies.app/</code> for a URL-prefix property). Then click Deploy.
             </li>
           </ol>
         </Card>
@@ -692,7 +692,7 @@ export default function IndexingReportPage() {
                   <p className="text-[11px] text-ink-500">Lets engines verify submissions</p>
                 </div>
               </div>
-              <p className="text-[12px] text-ink-500 leading-relaxed mb-3">Served from the INDEXNOW_KEY env var — no static key file needed:</p>
+              <p className="text-[12px] text-ink-500 leading-relaxed mb-3">Generated automatically (or set INDEXNOW_KEY) and served at this URL — no static key file needed:</p>
               <div className="mb-3 flex items-center gap-2 rounded-lg border border-ink-100 bg-ink-50 px-3 py-2 font-mono text-[11px] text-ink-700 break-all">
                 <KeyRound className="w-3 h-3 shrink-0 text-amber-600" />
                 {config?.indexNow?.keyLocation || '/indexnow-key'}

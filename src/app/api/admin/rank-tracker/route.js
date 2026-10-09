@@ -4,7 +4,7 @@ import { SITE_URL } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 // One keyword can need up to 10 SerpAPI calls (10 Google result pages).
-// 60s is allowed on every Vercel plan; the admin page checks keywords
+// Keep requests short (60s); the admin page checks keywords
 // one request at a time, so "check all" never needs longer.
 export const maxDuration = 60;
 
@@ -278,7 +278,7 @@ async function checkKeyword(db, kw) {
 
 const notConfigured = () =>
   NextResponse.json(
-    { error: 'SerpAPI is not configured — set SERPAPI_KEY (and optionally SERPAPI_KEY_BACKUP) in Vercel env.' },
+    { error: 'SerpAPI is not configured — set SERPAPI_KEY (and optionally SERPAPI_KEY_BACKUP) in Coolify → Environment Variables.' },
     { status: 503 }
   );
 

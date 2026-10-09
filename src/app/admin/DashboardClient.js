@@ -554,14 +554,14 @@ function NotConfiguredCard({ missing }) {
     <Card title="Google Analytics & Search Console — not configured" className="mb-6">
       <div className="text-[13px] text-ink-500 leading-relaxed space-y-3">
         <p>
-          Set these in <strong className="text-ink-900">Vercel → Project → Settings → Environment Variables</strong>, then redeploy:
+          Set these in <strong className="text-ink-900">Coolify → famiesapp → Environment Variables</strong>, then click Deploy:
         </p>
         <ul className="space-y-1.5">
           {[
             ['GOOGLE_SERVICE_ACCOUNT_EMAIL', 'the service account e-mail (…@….iam.gserviceaccount.com)'],
             ['GOOGLE_PRIVATE_KEY', 'the service account private key (\\n line breaks are fine)'],
             ['GA4_PROPERTY_ID', 'numeric GA4 property id (GA4 → Admin → Property details)'],
-            ['GSC_SITE_URL', `optional — Search Console property, default ${SITE_URL}/ (use sc-domain:famies.app for a domain property)`],
+            ['GSC_SITE_URL', 'optional — Search Console property, default sc-domain:famies.app (use https://famies.app/ for a URL-prefix property)'],
           ].map(([key, text]) => (
             <li key={key} className="flex flex-wrap items-baseline gap-2">
               <code className={cn('px-1.5 py-0.5 rounded-md text-[12px] font-bold', missing.includes(key) ? 'bg-red-50 text-red-600' : 'bg-ink-50 text-ink-700')}>
@@ -646,7 +646,7 @@ function TrafficSection() {
 
       {!ga.configured && (
         <Notice tone="warning" title="Google Analytics 4 — not configured" className="mb-4">
-          Set {ga.missing.join(', ')} in Vercel env to show visitors, pageviews, pages, sources and countries.
+          Set {ga.missing.join(', ')} in Coolify (Environment Variables) to show visitors, pageviews, pages, sources and countries.
         </Notice>
       )}
       {ga.configured && ga.error && (
@@ -656,7 +656,7 @@ function TrafficSection() {
       )}
       {!gsc.configured && (
         <Notice tone="warning" title="Search Console — not configured" className="mb-4">
-          Set {gsc.missing.join(', ')} in Vercel env to show search clicks and keywords.
+          Set {gsc.missing.join(', ')} in Coolify (Environment Variables) to show search clicks and keywords.
         </Notice>
       )}
       {gsc.configured && gsc.error && (

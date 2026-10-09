@@ -371,7 +371,7 @@ export default function RankTrackerPage() {
 
       {!meta.configured && (
         <Notice tone="warning" title="SerpAPI not configured" className="mb-6">
-          Rank checks need a SerpAPI key. Set <code className="font-bold">SERPAPI_KEY</code> in Vercel env (free plan: 250
+          Rank checks need a SerpAPI key. Set <code className="font-bold">SERPAPI_KEY</code> in Coolify → Environment Variables (free plan: 250
           searches / 30 days at serpapi.com). Optional: <code className="font-bold">SERPAPI_KEY_BACKUP</code> for a second
           account (pooled 500 / 30 days with automatic failover), and{' '}
           <code className="font-bold">SERPAPI_ACCOUNT_CREATED_AT</code> /{' '}
@@ -418,7 +418,7 @@ export default function RankTrackerPage() {
                 <KeyRound className="w-6 h-6" />
               </div>
               <p className="mt-3 text-sm font-bold text-ink-900">No SerpAPI quota</p>
-              <p className="mt-1 text-[12px] text-ink-500">Set SERPAPI_KEY in Vercel env.</p>
+              <p className="mt-1 text-[12px] text-ink-500">Set SERPAPI_KEY in Coolify → Environment Variables.</p>
             </>
           )}
         </div>

@@ -22,7 +22,7 @@ const SCOPES = [
 
 function privateKey() {
   let key = process.env.GOOGLE_PRIVATE_KEY || '';
-  // Vercel sometimes keeps the surrounding quotes of a pasted JSON value.
+  // Env UIs sometimes keep the surrounding quotes of a pasted JSON value.
   if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
     key = key.slice(1, -1);
   }

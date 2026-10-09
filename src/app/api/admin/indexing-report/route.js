@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { requireAdmin } from '@/lib/admin';
 import { SITE_URL } from '@/lib/site';
+import { indexNowKey } from '@/lib/indexnow';
 import {
   SITE_HOST,
   normalizePath,
@@ -30,7 +31,7 @@ import {
  *   GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY  (literal "\n" unescaped)
  *   GSC_SITE_URL   Search Console property — "sc-domain:famies.app" (default)
  *                  or a URL-prefix property like "https://famies.app/"
- *   INDEXNOW_KEY   8–128 chars [a-zA-Z0-9-]; served at /indexnow-key
+ *   INDEXNOW_KEY   optional, 8–128 chars [a-zA-Z0-9-]; derived from SESSION_SECRET when unset; served at /indexnow-key
  */
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -50,7 +51,7 @@ const SCOPE_INDEXING = 'https://www.googleapis.com/auth/indexing';
 
 function googlePrivateKey() {
   let key = (process.env.GOOGLE_PRIVATE_KEY || '').trim();
-  // Vercel keeps surrounding quotes when the JSON value is pasted with them.
+  // Env UIs sometimes keep surrounding quotes when the JSON value is pasted with them.
   if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) key = key.slice(1, -1);
   return key.replace(/\\n/g, '\n');
 }
@@ -71,9 +72,6 @@ function gscProperty() {
   return `sc-domain:${raw.replace(/^www\./i, '').replace(/\/+$/, '')}`;
 }
 
-function indexNowKey() {
-  return (process.env.INDEXNOW_KEY || '').trim();
-}
 
 function configSummary() {
   const missing = missingGoogleEnv();
@@ -98,7 +96,7 @@ function configSummary() {
 
 function notConfigured(what, missing) {
   return NextResponse.json(
-    { error: `${what} is not configured`, missing, hint: `Set ${missing.join(', ')} in the Vercel environment variables and redeploy.` },
+    { error: `${what} is not configured`, missing, hint: `Set ${missing.join(', ')} in Coolify → famiesapp → Environment Variables and redeploy.` },
     { status: 503 }
   );
 }

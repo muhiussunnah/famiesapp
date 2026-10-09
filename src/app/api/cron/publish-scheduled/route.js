@@ -9,7 +9,7 @@ import { revalidatePosts } from '@/lib/cache';
  * only tidies up the status (admin lists, Writerfy drafts, counts). Runs
  * daily (Coolify scheduled task or vercel.json); any cron can call it.
  *
- * Auth: Vercel Cron sends `Authorization: Bearer $CRON_SECRET`.
+ * Auth: `Authorization: Bearer $CRON_SECRET` (Coolify scheduled task / any cron).
  */
 
 export const runtime = 'nodejs';
