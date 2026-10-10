@@ -10,63 +10,24 @@ import {
   Heart,
 } from 'lucide-react';
 import WaveDivider from './WaveDivider';
+import { formatText, plainText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
-// Each feature is framed as a SOLUTION to a parent pain point.
-const features = [
-  {
-    id: 1,
-    eyebrow: 'Slipp söka',
-    title: 'Tips från familjer som är som din.',
-    description:
-      'Upptäck platser, aktiviteter och upplevelser som andra familjer redan testat, smart utvalda så du slipper googla.',
-    icon: Compass,
-    tint: 'pink',
-    image: '/feature1.png',
-  },
-  {
-    id: 2,
-    eyebrow: 'Nära dig',
-    title: 'Famies följer med dit du är.',
-    description:
-      'Se vad som finns där ni bor, eller där ni råkar vara. Allt lokalt, inget filler.',
-    icon: MapPin,
-    tint: 'mint',
-    image: '/feature2.png',
-  },
-  {
-    id: 3,
-    eyebrow: 'Ingen idétorka',
-    title: 'Hitta något på 10 sekunder.',
-    description:
-      'Öppna appen. Få förslag. Klart. Ingen oändlig scroll, ingen googling, inget bortkastat lördagsförmiddag.',
-    icon: Zap,
-    tint: 'pink',
-    image: '/feature3.png',
-  },
-  {
-    id: 4,
-    eyebrow: 'Vardag + helg',
-    title: 'Byggt för hela familjelivet.',
-    description:
-      'Från småbarnsåren till tonåren, flödet följer med och ändras när era behov ändras.',
-    icon: Calendar,
-    tint: 'mint',
-    image: '/feature4.png',
-  },
-  {
-    id: 5,
-    eyebrow: 'Alltid något nytt',
-    title: 'Nya tips varje vecka.',
-    description:
-      'Färska evenemang och idéer från 270+ källor, uppdaterat för ditt område. Du öppnar, det är redan där.',
-    icon: Heart,
-    tint: 'pink',
-    image: '/feature5.png',
-  },
-];
+// Each feature is framed as a SOLUTION to a parent pain point. Texts and
+// screenshots come from the admin; icons and tints follow the position.
+const ICONS = [Compass, MapPin, Zap, Calendar, Heart];
 
-export default function Features() {
+export default function Features({ text = HOMEPAGE_TEXT_DEFAULTS.features }) {
   const [activeFeature, setActiveFeature] = useState(0);
+  const features = text.items.map((item, i) => ({
+    id: i + 1,
+    eyebrow: item.eyebrow,
+    title: item.title,
+    description: item.description,
+    icon: ICONS[i % ICONS.length],
+    tint: i % 2 === 0 ? 'pink' : 'mint',
+    image: item.image || `/feature${(i % 5) + 1}.png`,
+  }));
 
   return (
     <>
@@ -75,17 +36,21 @@ export default function Features() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16 md:mb-24 max-w-3xl mx-auto">
-            <div className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary">
-              Därför älskar föräldrar Famies
-            </div>
-            <h2 className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6">
-              Allt <span className="text-brand-gradient">ni behöver</span>.<br />
-              Ingenting ni inte behöver.
-            </h2>
-            <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium">
-              Ingen app för listor. Ingen app för kalendrar. Ett flöde som svarar på en fråga:
-              <span className="text-ink-900 dark:text-white font-bold"> "Vad ska vi göra idag?"</span>
-            </p>
+            {text.badge && (
+              <div className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary">
+                {text.badge}
+              </div>
+            )}
+            {text.title && (
+              <h2 className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6">
+                {formatText(text.title)}
+              </h2>
+            )}
+            {text.subtitle && (
+              <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium">
+                {formatText(text.subtitle, { strongClassName: 'text-ink-900 dark:text-white font-bold' })}
+              </p>
+            )}
           </div>
 
           {/* Sticky phone + scrolling copy */}
@@ -112,8 +77,10 @@ export default function Features() {
                       <div className="relative w-full h-full bg-white">
                         <Image
                           src={feature.image}
-                          alt={feature.title}
+                          alt={plainText(feature.title)}
                           fill
+                          // Pasted links to other sites skip the optimizer (no remotePatterns needed).
+                          unoptimized={!feature.image.startsWith('/')}
                           className="object-cover"
                           priority={index < 2}
                           sizes="320px"
@@ -136,7 +103,7 @@ export default function Features() {
                     <button
                       key={index}
                       onClick={() => setActiveFeature(index)}
-                      aria-label={`Gå till: ${f.title}`}
+                      aria-label={`Gå till: ${plainText(f.title)}`}
                       className={`w-2 rounded-full transition-all duration-500 ease-in-out ${
                         isActive ? `h-14 ${bar}` : 'h-2 bg-ink-100 dark:bg-ink-700'
                       }`}
@@ -212,7 +179,7 @@ function FeatureItem({ feature, index, activeFeature, setActiveFeature }) {
             isActive ? 'text-ink-900 dark:text-white' : 'text-ink-300'
           }`}
         >
-          {feature.title}
+          {formatText(feature.title)}
         </h3>
 
         <p
@@ -220,7 +187,7 @@ function FeatureItem({ feature, index, activeFeature, setActiveFeature }) {
             isActive ? 'text-ink-500 dark:text-ink-100' : 'text-ink-300'
           }`}
         >
-          {feature.description}
+          {formatText(feature.description)}
         </p>
 
         {isActive && (

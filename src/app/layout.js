@@ -9,6 +9,7 @@ import { getEnabledScripts, groupByPosition } from "@/lib/site-scripts";
 import { renderHeadScript, renderBodySnippet, splitHeadSnippets } from "@/lib/render-head-script";
 import { buildThemeCSS } from "@/lib/theme-colors";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
+import { HOMEPAGE_TEXT_KEY } from "@/lib/homepage-text";
 
 // Pages are prerendered at build time without the database (it is not
 // reachable during the Docker build), so re-render them at most every 60s
@@ -115,6 +116,10 @@ export default async function RootLayout({ children }) {
   const { head, bodyStart, bodyEnd } = groupByPosition(scripts);
   const themeCSS = buildThemeCSS(siteContent.settings);
   const customCSS = siteContent.settings.global_custom_css;
+  // The homepage text is only read by the homepage itself; keep the JSON
+  // out of the client payload of every other page.
+  const { [HOMEPAGE_TEXT_KEY]: _homepageText, ...shellSettings } = siteContent.settings;
+  const shellContent = { ...siteContent, settings: shellSettings };
 
   return (
     <html lang="sv" suppressHydrationWarning>
@@ -137,7 +142,7 @@ export default async function RootLayout({ children }) {
           <LayoutShell
             comingSoon={isComingSoon(siteContent.settings)}
             menus={menus}
-            siteContent={siteContent}
+            siteContent={shellContent}
           >
             {children}
           </LayoutShell>

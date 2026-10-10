@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
 /**
  * Famies Coming Soon landing, dark, minimal, brand-pure.
@@ -97,7 +98,11 @@ function StoreBadge({ href, label, store, icon }) {
   );
 }
 
-export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl = GOOGLE_PLAY_URL } = {}) {
+export default function ComingSoon({
+  appStoreUrl = APP_STORE_URL,
+  googlePlayUrl = GOOGLE_PLAY_URL,
+  text = HOMEPAGE_TEXT_DEFAULTS.comingSoon,
+} = {}) {
   return (
     <main
       className="fixed inset-0 z-[200] min-h-screen w-full overflow-hidden flex flex-col items-center justify-between text-white"
@@ -172,22 +177,28 @@ export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl 
           transition={{ duration: 0.85, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="text-center font-black leading-[1.05] tracking-tight"
         >
-          <span className="block text-[2.4rem] sm:text-5xl md:text-6xl text-white">
-            Där familjer hittar
-          </span>
-          <span className="block text-[2.4rem] sm:text-5xl md:text-6xl mt-1 sm:mt-2 text-[#FF8FAF]">
-            nästa upplevelse.
-          </span>
+          {text.title && (
+            <span className="block text-[2.4rem] sm:text-5xl md:text-6xl text-white">
+              {text.title}
+            </span>
+          )}
+          {text.titleAccent && (
+            <span className="block text-[2.4rem] sm:text-5xl md:text-6xl mt-1 sm:mt-2 text-[#FF8FAF]">
+              {text.titleAccent}
+            </span>
+          )}
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.35 }}
-          className="mt-7 sm:mt-9 max-w-md text-center text-base sm:text-lg text-white/70 leading-relaxed font-medium"
-        >
-          Hitta aktiviteter, event och andra familjer i närheten.
-        </motion.p>
+        {text.subtitle && (
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.35 }}
+            className="mt-7 sm:mt-9 max-w-md text-center text-base sm:text-lg text-white/70 leading-relaxed font-medium whitespace-pre-line"
+          >
+            {text.subtitle}
+          </motion.p>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -195,18 +206,22 @@ export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl 
           transition={{ duration: 0.7, delay: 0.5 }}
           className="mt-10 sm:mt-12 flex flex-col items-center gap-3"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] backdrop-blur-md ring-1 ring-white/10">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF8FAF] opacity-75 animate-ping" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF8FAF]" />
-            </span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">
-              Lansering pågår
-            </span>
-          </div>
-          <p className="text-sm text-white/55 font-medium">
-            Tillgänglig nu i App Store och Google Play.
-          </p>
+          {text.badge && (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] backdrop-blur-md ring-1 ring-white/10">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF8FAF] opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF8FAF]" />
+              </span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/85">
+                {text.badge}
+              </span>
+            </div>
+          )}
+          {text.note && (
+            <p className="text-sm text-white/55 font-medium">
+              {text.note}
+            </p>
+          )}
         </motion.div>
 
         {/* Store download badges */}
@@ -218,13 +233,13 @@ export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl 
         >
           <StoreBadge
             href={googlePlayUrl}
-            label="Ladda ner på"
+            label={text.storeLabel}
             store="Google Play"
             icon={<GooglePlayIcon className="w-7 h-7 sm:w-8 sm:h-8 shrink-0" />}
           />
           <StoreBadge
             href={appStoreUrl}
-            label="Ladda ner på"
+            label={text.storeLabel}
             store="App Store"
             icon={<AppleIcon className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-white" />}
           />
@@ -239,7 +254,7 @@ export default function ComingSoon({ appStoreUrl = APP_STORE_URL, googlePlayUrl 
         className="relative z-10 py-6 px-6 text-center"
       >
         <p className="text-xs text-white/40 font-medium">
-          © {new Date().getFullYear()} Famies. Skapar bättre familjerelationer.
+          © {new Date().getFullYear()} {text.footer}
         </p>
       </motion.footer>
     </main>

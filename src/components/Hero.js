@@ -4,27 +4,24 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Apple, Play, PlayCircle, X, Sparkles, MapPin, Star } from 'lucide-react';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS, videoEmbedUrl } from '@/lib/homepage-text';
 
 const DEFAULT_APP_STORE_URL = 'https://apps.apple.com/se/app/famies/id6450005701';
 const DEFAULT_GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=com.famapdirectory.apps&hl=en';
 
-/** "Vill du veta vad *nära dig*" → the starred words get the brand gradient. */
-function renderTitle(title) {
-  return title.split(/(\*[^*]+\*)/g).map((part, i) =>
-    part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
-      <span key={i} className="text-brand-gradient">{part.slice(1, -1)}</span>
-    ) : (
-      part
-    )
-  );
-}
-
 /**
- * Homepage hero. eyebrow / title / subtitle come from /admin/homepage;
- * when empty, the original designed copy is shown.
+ * Homepage hero. All texts come from /admin/homepage → Homepage text
+ * (src/lib/homepage-text.js holds the original copy as defaults).
  */
-export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlayUrl } = {}) {
+export default function Hero({
+  text = HOMEPAGE_TEXT_DEFAULTS.hero,
+  buttons = HOMEPAGE_TEXT_DEFAULTS.buttons,
+  appStoreUrl,
+  googlePlayUrl,
+} = {}) {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const videoSrc = videoEmbedUrl(text.demoVideoUrl);
 
   return (
     <section className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden pt-32 pb-20 section">
@@ -38,47 +35,34 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
           className="text-center lg:text-left"
         >
           {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-7 rounded-full glass shadow-soft"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-ink-700 dark:text-ink-100">
-              {eyebrow || 'Byggd av föräldrar, för föräldrar'}
-            </span>
-          </motion.div>
+          {text.eyebrow && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 mb-7 rounded-full glass shadow-soft"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-700 dark:text-ink-100">
+                {text.eyebrow}
+              </span>
+            </motion.div>
+          )}
 
-          {/* Headline, curiosity-driven question */}
+          {/* Headline, curiosity-driven question. Never empty: it is the page's H1. */}
           <h1 className="text-[2.4rem] sm:text-[3.25rem] lg:text-[4rem] leading-[1.05] font-black tracking-tight text-ink-900 dark:text-white mb-6">
-            {title ? (
-              renderTitle(title)
-            ) : (
-              <>
-                <span className="block">Vill du veta vad</span>
-                <span className="block">
-                  familjer <span className="text-brand-gradient">nära dig</span>
-                </span>
-                <span className="block">hittar på?</span>
-              </>
-            )}
+            {formatText(text.title.trim() || HOMEPAGE_TEXT_DEFAULTS.hero.title)}
           </h1>
 
           {/* Subtitle, what + by whom */}
-          <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-            {subtitle || (
-              <>
-                <span className="block text-ink-900 dark:text-white font-semibold">
-                  Aktiviteter, event och skoj. Tillsammans.
-                </span>
-                Delat av familjer i närheten.
-              </>
-            )}
-          </p>
+          {text.subtitle && (
+            <p className="text-lg md:text-xl text-ink-500 dark:text-ink-300 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+              {formatText(text.subtitle)}
+            </p>
+          )}
 
           {/* CTAs, native store buttons, the real conversion */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
@@ -90,8 +74,8 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
             >
               <Apple size={26} fill="currentColor" />
               <span className="flex flex-col leading-none text-left">
-                <span className="text-[10px] uppercase opacity-70 tracking-wider">Ladda ner för</span>
-                <span className="text-base font-extrabold">App Store</span>
+                <span className="text-[10px] uppercase opacity-70 tracking-wider">{buttons.appStoreSmall}</span>
+                <span className="text-base font-extrabold">{buttons.appStoreBig}</span>
               </span>
             </Link>
 
@@ -103,46 +87,54 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
             >
               <Play size={24} fill="currentColor" className="text-primary" />
               <span className="flex flex-col leading-none text-left">
-                <span className="text-[10px] uppercase opacity-70 tracking-wider">Hämta på</span>
-                <span className="text-base font-extrabold">Google Play</span>
+                <span className="text-[10px] uppercase opacity-70 tracking-wider">{buttons.googlePlaySmall}</span>
+                <span className="text-base font-extrabold">{buttons.googlePlayBig}</span>
               </span>
             </Link>
 
-            <button
-              onClick={() => setIsVideoOpen(true)}
-              className="press group flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-transparent text-ink-900 dark:text-white font-bold underline-offset-4 hover:underline"
-            >
-              <PlayCircle size={22} className="text-primary group-hover:scale-110 transition" />
-              Se 30-sek demo
-            </button>
+            {videoSrc && text.demoLabel && (
+              <button
+                onClick={() => setIsVideoOpen(true)}
+                className="press group flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-transparent text-ink-900 dark:text-white font-bold underline-offset-4 hover:underline"
+              >
+                <PlayCircle size={22} className="text-primary group-hover:scale-110 transition" />
+                {text.demoLabel}
+              </button>
+            )}
           </div>
 
           {/* Trust strip */}
           <div className="flex flex-wrap items-center gap-6 justify-center lg:justify-start">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-ink-900 bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-black text-white"
-                  >
-                    {['A', 'L', 'M', 'S'][i]}
-                  </div>
+            {(text.trustTitle || text.trustText) && (
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-ink-900 bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-black text-white"
+                    >
+                      {['A', 'L', 'M', 'S'][i]}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm">
+                  <div className="font-bold text-ink-900 dark:text-white">{text.trustTitle}</div>
+                  <div className="text-ink-500 dark:text-ink-300 text-xs">{text.trustText}</div>
+                </div>
+              </div>
+            )}
+            {(text.trustTitle || text.trustText) && text.rating && (
+              <div className="h-10 w-px bg-ink-100 dark:bg-ink-700 hidden sm:block" />
+            )}
+            {text.rating && (
+              <div className="flex items-center gap-1.5">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Star key={i} size={18} className="fill-primary text-primary" />
                 ))}
+                <span className="ml-2 text-sm font-bold text-ink-900 dark:text-white">{text.rating}</span>
+                <span className="text-sm text-ink-500 dark:text-ink-300">{text.ratingLabel}</span>
               </div>
-              <div className="text-sm">
-                <div className="font-bold text-ink-900 dark:text-white">10 000+ familjer</div>
-                <div className="text-ink-500 dark:text-ink-300 text-xs">laddat ner redan</div>
-              </div>
-            </div>
-            <div className="h-10 w-px bg-ink-100 dark:bg-ink-700 hidden sm:block" />
-            <div className="flex items-center gap-1.5">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <Star key={i} size={18} className="fill-primary text-primary" />
-              ))}
-              <span className="ml-2 text-sm font-bold text-ink-900 dark:text-white">4.8</span>
-              <span className="text-sm text-ink-500 dark:text-ink-300">/ App Store</span>
-            </div>
+            )}
           </div>
         </motion.div>
 
@@ -164,7 +156,7 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
               <div className="relative w-full h-full rounded-[2.2rem] overflow-hidden bg-white">
                 <Image
                   src="/app-screenshot.png"
-                  alt="Famies app, hem-flöde med evenemang nära dig"
+                  alt={text.imageAlt}
                   fill
                   className="object-cover"
                   priority
@@ -176,54 +168,64 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
           </div>
 
           {/* Floating card 1, top */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="absolute top-12 -left-2 sm:-left-8 glass rounded-2xl p-3 pr-5 shadow-pink animate-float-y"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center text-2xl">
-                🎪
+          {text.card1Title && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="absolute top-12 -left-2 sm:-left-8 glass rounded-2xl p-3 pr-5 shadow-pink animate-float-y"
+            >
+              <div className="flex items-center gap-3">
+                {text.card1Emoji && (
+                  <div className="w-11 h-11 rounded-xl bg-primary/20 flex items-center justify-center text-2xl">
+                    {text.card1Emoji}
+                  </div>
+                )}
+                <div>
+                  <p className="font-bold text-sm text-ink-900 dark:text-white leading-tight">
+                    {text.card1Title}
+                  </p>
+                  {text.card1Text && (
+                    <p className="text-xs text-ink-500 dark:text-ink-300 flex items-center gap-1">
+                      <MapPin size={11} /> {text.card1Text}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-sm text-ink-900 dark:text-white leading-tight">
-                  Lördag • Familjemys
-                </p>
-                <p className="text-xs text-ink-500 dark:text-ink-300 flex items-center gap-1">
-                  <MapPin size={11} /> 1,2 km från dig
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Floating card 2, bottom */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-            className="absolute bottom-16 -right-2 sm:-right-10 glass rounded-2xl p-3 pr-4 shadow-mint animate-float-y-slow"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-secondary/50 flex items-center justify-center">
-                <Sparkles size={20} className="text-green-700" />
+          {text.card2Title && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.6 }}
+              className="absolute bottom-16 -right-2 sm:-right-10 glass rounded-2xl p-3 pr-4 shadow-mint animate-float-y-slow"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-secondary/50 flex items-center justify-center">
+                  <Sparkles size={20} className="text-green-700" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-ink-900 dark:text-white leading-tight">
+                    {text.card2Title}
+                  </p>
+                  {text.card2Text && (
+                    <p className="text-xs text-ink-500 dark:text-ink-300">
+                      {text.card2Text}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-sm text-ink-900 dark:text-white leading-tight">
-                  Valt åt dig
-                </p>
-                <p className="text-xs text-ink-500 dark:text-ink-300">
-                  baserat på era barn
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
       {/* Demo video modal */}
       <AnimatePresence>
-        {isVideoOpen && (
+        {isVideoOpen && videoSrc && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -249,7 +251,7 @@ export default function Hero({ eyebrow, title, subtitle, appStoreUrl, googlePlay
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/p7zK0D5D1uM?autoplay=1"
+                src={videoSrc}
                 title="Famies Demo Video"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -2,35 +2,20 @@
 import { motion } from 'framer-motion';
 import { Lightbulb, Calendar, MessageCircle, Users } from 'lucide-react';
 import WaveDivider from './WaveDivider';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
-const pains = [
-  {
-    quote: 'Tipsen från andra familjer i närheten',
-    body: 'Platser och idéer från familjer som är som din.',
-    icon: Lightbulb,
-    accent: 'pink',
-  },
-  {
-    quote: 'Eventet som händer runt hörnet',
-    body: 'Aktiviteter nära er, anpassat efter barnens ålder.',
-    icon: Calendar,
-    accent: 'mint',
-  },
-  {
-    quote: 'Svaret från någon som redan vet',
-    body: 'Fråga, få svar från andra föräldrar i närheten.',
-    icon: MessageCircle,
-    accent: 'pink',
-  },
-  {
-    quote: 'Familjerna i samma situation',
-    body: 'Skapa eller hitta gruppen med samma vardag och intressen som du.',
-    icon: Users,
-    accent: 'mint',
-  },
-];
+// Card icons and accents follow the card's position (texts come from the admin).
+const ICONS = [Lightbulb, Calendar, MessageCircle, Users];
 
-export default function PainPoints() {
+export default function PainPoints({ text = HOMEPAGE_TEXT_DEFAULTS.pain }) {
+  const pains = text.cards.map((card, i) => ({
+    quote: card.title,
+    body: card.body,
+    icon: ICONS[i % ICONS.length],
+    accent: i % 2 === 0 ? 'pink' : 'mint',
+  }));
+
   return (
     <>
       <WaveDivider variant="pink-to-mint" height={90} />
@@ -38,39 +23,45 @@ export default function PainPoints() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-14 md:mb-20 max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-              </span>
-              Lansering pågår · Stockholm 2026
-            </motion.div>
+            {text.badge && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+                {text.badge}
+              </motion.div>
+            )}
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6"
-            >
-              Missa <span className="text-brand-gradient">inte.</span>
-            </motion.h2>
+            {text.title && (
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6"
+              >
+                {formatText(text.title)}
+              </motion.h2>
+            )}
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium"
-            >
-              Lokala tips, event och svar. På ett ställe.
-            </motion.p>
+            {text.subtitle && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium"
+              >
+                {formatText(text.subtitle)}
+              </motion.p>
+            )}
           </div>
 
           {/* Cards */}
@@ -100,10 +91,10 @@ export default function PainPoints() {
                     <Icon className={accentIcon} size={22} />
                   </div>
                   <p className="text-xl md:text-2xl font-extrabold text-ink-900 dark:text-white mb-3 leading-snug">
-                    {p.quote}
+                    {formatText(p.quote)}
                   </p>
                   <p className="text-ink-500 dark:text-ink-300 leading-relaxed">
-                    {p.body}
+                    {formatText(p.body)}
                   </p>
                 </motion.div>
               );
@@ -111,15 +102,17 @@ export default function PainPoints() {
           </div>
 
           {/* Transition line */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mt-14 md:mt-20 text-2xl md:text-3xl font-black text-ink-900 dark:text-white"
-          >
-            Så vi byggde ett enklare sätt. <span className="text-brand-gradient">↓</span>
-          </motion.p>
+          {text.outro && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mt-14 md:mt-20 text-2xl md:text-3xl font-black text-ink-900 dark:text-white"
+            >
+              {formatText(text.outro)}
+            </motion.p>
+          )}
         </div>
       </section>
     </>

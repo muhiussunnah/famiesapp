@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowRight, ArrowLeft, Calendar, Clock, ChevronRight } from 'lucide-react';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
 const formatDate = (post) =>
   new Date(post.published_at || post.scheduled_at || post.created_at).toLocaleDateString('sv-SE');
 
 // `posts` are the latest live articles, loaded on the server by the homepage.
-export default function BlogSlider({ posts = [] }) {
+export default function BlogSlider({ posts = [], text = HOMEPAGE_TEXT_DEFAULTS.articles }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -56,10 +58,14 @@ export default function BlogSlider({ posts = [] }) {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">Inspiration</span>
-            <h2 className="text-4xl md:text-5xl font-black text-ink-900 dark:text-white leading-tight">
-              Senaste <span className="text-brand-gradient">artiklar</span> & tips.
-            </h2>
+            {text.eyebrow && (
+              <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">{text.eyebrow}</span>
+            )}
+            {text.title && (
+              <h2 className="text-4xl md:text-5xl font-black text-ink-900 dark:text-white leading-tight">
+                {formatText(text.title)}
+              </h2>
+            )}
           </motion.div>
 
           {/* Controls */}
@@ -106,7 +112,7 @@ export default function BlogSlider({ posts = [] }) {
                       <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/50" />
                     )}
                     <div className="absolute top-4 left-4 bg-white/95 dark:bg-black/95 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-primary shadow-lg">
-                      {post.category || 'Artikel'}
+                      {post.category || text.fallbackCategory}
                     </div>
                   </div>
 
@@ -126,7 +132,7 @@ export default function BlogSlider({ posts = [] }) {
                     </p>
 
                     <Link href={post.slug} className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary transition-all group-hover:gap-3 mt-auto">
-                      Läs mer <ArrowRight size={16} />
+                      {text.readMore} <ArrowRight size={16} />
                     </Link>
                   </div>
                 </div>
@@ -136,17 +142,19 @@ export default function BlogSlider({ posts = [] }) {
         </div>
 
         {/* --- View All Button --- */}
-        <div className="mt-14 text-center">
-          <Link href="/inspiration">
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="press px-10 py-4 rounded-full bg-primary hover:bg-primary-500 text-white font-extrabold text-lg shadow-pink flex items-center gap-3 mx-auto transition-all"
-            >
-              Se alla artiklar <ChevronRight size={20} className="stroke-[3px]" />
-            </motion.button>
-          </Link>
-        </div>
+        {text.viewAll && (
+          <div className="mt-14 text-center">
+            <Link href="/inspiration">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="press px-10 py-4 rounded-full bg-primary hover:bg-primary-500 text-white font-extrabold text-lg shadow-pink flex items-center gap-3 mx-auto transition-all"
+              >
+                {text.viewAll} <ChevronRight size={20} className="stroke-[3px]" />
+              </motion.button>
+            </Link>
+          </div>
+        )}
 
       </div>
     </section>

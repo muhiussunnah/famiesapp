@@ -1,64 +1,28 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
-const stats = [
-  { n: '10 000+', label: 'nedladdningar' },
-  { n: '500+', label: 'evenemang i flödet' },
-  { n: '270+', label: 'kurerade källor' },
-  { n: '4.8', label: 'snitt i App Store' },
-];
+// Full class names so Tailwind keeps them in the CSS build.
+const STAT_COLUMNS = {
+  1: 'md:grid-cols-1',
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+  4: 'md:grid-cols-4',
+  5: 'md:grid-cols-5',
+  6: 'md:grid-cols-6',
+};
 
-const testimonials = [
-  {
-    name: 'Anna, 34',
-    role: 'mamma till 3 & 6 år',
-    city: 'Stockholm',
-    quote:
-      'Äntligen en app som bara visar det som passar oss. Jag brukade googla i en halvtimme varje lördag. Nu öppnar jag Famies och vi är ute innan klockan tio.',
-  },
-  {
-    name: 'Markus, 41',
-    role: 'pappa till två',
-    city: 'Solna',
-    quote:
-      'Det är som att ha en kompis som alltid vet vad som händer. Sparar oss så mycket tid, och vi upptäcker saker precis runt hörnet som vi aldrig sett.',
-  },
-  {
-    name: 'Linnea, 29',
-    role: 'förstagångsförälder',
-    city: 'Nacka',
-    quote:
-      'Som ny förälder har jag inte energi att leta. Famies gör det åt mig. Flödet är lugnt, tips passar oss, och det känns inte som reklam.',
-  },
-  {
-    name: 'Sofia & Erik',
-    role: 'familj med 4 barn',
-    city: 'Upplands Väsby',
-    quote:
-      'Vi har testat allt: kalendrar, listor, grupper på Facebook. Famies är det första som faktiskt känns gjort för föräldrar.',
-  },
-  {
-    name: 'Johan, 37',
-    role: 'pappa till 2 & 5 år',
-    city: 'Södermalm',
-    quote:
-      'Brevlådan med kortnotiser är min favorit. Jag kollar en gång om dagen och vet exakt vad som är på gång. Klart.',
-  },
-  {
-    name: 'Emma, 32',
-    role: 'mamma till tvillingar',
-    city: 'Täby',
-    quote:
-      'Det bästa är att appen följer med när barnen växer. Förra året var det småbarnsaktiviteter. Nu är det andra grejer. Samma app.',
-  },
-];
+export default function SocialProof({ text = HOMEPAGE_TEXT_DEFAULTS.reviews }) {
+  const stats = text.stats.map((s) => ({ n: s.value, label: s.label }));
+  const testimonials = text.testimonials;
 
-export default function SocialProof() {
   return (
     <section className="relative w-full py-20 md:py-28 section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats strip */}
+        {stats.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -66,7 +30,7 @@ export default function SocialProof() {
           transition={{ duration: 0.6 }}
           className="glass rounded-3xl md:rounded-[2rem] shadow-soft p-8 md:p-10 mb-20 md:mb-24"
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 text-center">
+          <div className={`grid grid-cols-2 ${STAT_COLUMNS[Math.min(stats.length, 6)] || 'md:grid-cols-4'} gap-6 md:gap-4 text-center`}>
             {stats.map((s, i) => (
               <div key={i} className="relative">
                 <div className="text-4xl md:text-5xl font-black text-brand-gradient mb-2">
@@ -82,17 +46,23 @@ export default function SocialProof() {
             ))}
           </div>
         </motion.div>
+        )}
 
         {/* Testimonials header */}
-        <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
-          <div className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary">
-            Vad föräldrar säger
+        {(text.badge || text.title) && (
+          <div className="text-center mb-14 md:mb-16 max-w-3xl mx-auto">
+            {text.badge && (
+              <div className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary">
+                {text.badge}
+              </div>
+            )}
+            {text.title && (
+              <h2 className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6">
+                {formatText(text.title)}
+              </h2>
+            )}
           </div>
-          <h2 className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6">
-            Familjer gör <span className="text-brand-gradient">mer</span>. <br />
-            Letar <span className="text-brand-gradient">mindre</span>.
-          </h2>
-        </div>
+        )}
 
         {/* Testimonial grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
@@ -130,7 +100,7 @@ export default function SocialProof() {
                     {t.name}
                   </div>
                   <div className="text-xs text-ink-500 dark:text-ink-300">
-                    {t.role} • {t.city}
+                    {[t.role, t.city].filter(Boolean).join(' • ')}
                   </div>
                 </div>
               </div>

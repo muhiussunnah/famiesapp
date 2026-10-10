@@ -4,7 +4,7 @@ Website for the Famies family-activities app: Next.js 16 + PostgreSQL, self-host
 
 - **Public site** — homepage, `/inspiration` (articles), article pages at `/<slug>`, contact, skapa-event, legal pages, `sitemap.xml`, `robots.txt`, `feed.xml`.
 - **Admin panel** — `/admin` (login at `/login`, admin emails only). Same sections as mushroomidentifiers.com minus Subscriptions and Adify:
-  Dashboard (+ Coming Soon switch) · Pages (articles/pages editor, scheduling) · Homepage · Rank Tracker · SEO Health · Indexing Report · Header Scripts · External Links · Menus · Footer Content · Theme Colors · Custom CSS.
+  Dashboard (+ Coming Soon switch) · Pages (articles/pages editor, scheduling) · Homepage (every heading and text, plus extra blocks) · Rank Tracker · SEO Health · Indexing Report · Header Scripts · External Links · Menus · Footer Content · Theme Colors · Custom CSS.
 - **Writerify API** — publish articles straight from the Writerify desktop app (`/api/writerify/*`).
 
 There are no public user accounts (no signup, no user dashboard).

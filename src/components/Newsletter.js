@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, ArrowRight, Send, Loader2, CheckCircle, Sparkles, Lock } from 'lucide-react';
 import { submitForm } from '@/lib/forms';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
-export default function Newsletter() {
+export default function Newsletter({ text = HOMEPAGE_TEXT_DEFAULTS.newsletter }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
@@ -24,7 +26,6 @@ export default function Newsletter() {
     } catch (error) {
       console.error(error);
       setStatus('error');
-      alert(error.message || 'Something went wrong!');
     } finally {
       setLoading(false);
     }
@@ -61,19 +62,24 @@ export default function Newsletter() {
             
             {/* বাম পাশ: টেক্সট */}
             <div className="text-center md:text-left md:w-1/2">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 dark:bg-black/20 border border-white/40 backdrop-blur-md mb-6 shadow-sm">
-                <Sparkles size={16} className="text-primary" />
-                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wide">VECKOBREV</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl font-black text-ink-900 dark:text-white leading-tight mb-4">
-                Lås upp exklusiva<br/>
-                <span className="text-brand-gradient">familjetips.</span>
-              </h2>
+              {text.badge && (
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 dark:bg-black/20 border border-white/40 backdrop-blur-md mb-6 shadow-sm">
+                  <Sparkles size={16} className="text-primary" />
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wide">{text.badge}</span>
+                </div>
+              )}
 
-              <p className="text-lg text-ink-500 dark:text-ink-200 leading-relaxed">
-                Gör som över 10 000 föräldrar, få våra utvalda evenemang och veckans bästa tips direkt i inkorgen.
-              </p>
+              {text.title && (
+                <h2 className="text-4xl md:text-5xl font-black text-ink-900 dark:text-white leading-tight mb-4">
+                  {formatText(text.title)}
+                </h2>
+              )}
+
+              {text.text && (
+                <p className="text-lg text-ink-500 dark:text-ink-200 leading-relaxed">
+                  {formatText(text.text)}
+                </p>
+              )}
             </div>
 
             {/* ডান পাশ: ফর্ম */}
@@ -94,7 +100,7 @@ export default function Newsletter() {
                    
                    <input 
                     type="email" 
-                    placeholder="namn@exempel.se" 
+                    placeholder={text.placeholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-14 pr-36 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-white/40 dark:border-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900 dark:text-white transition-all placeholder:text-gray-400"
@@ -112,7 +118,7 @@ export default function Newsletter() {
                      ) : status === 'success' ? (
                        <CheckCircle size={18} />
                      ) : (
-                       <>Gå med <ArrowRight size={18} /></>
+                       <>{text.button} <ArrowRight size={18} /></>
                      )}
                    </button>
                 </div>
@@ -124,15 +130,27 @@ export default function Newsletter() {
                   animate={{ opacity: 1 }}
                   className="mt-3 text-sm text-green-600 font-medium flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-100"
                 >
-                  <CheckCircle size={14} /> Du står nu på listan!
+                  <CheckCircle size={14} /> {text.success}
                 </motion.p>
               )}
-              
-              {/* ✅ FIXED TEXT: Short & Clear */}
-              <div className="mt-4 flex items-center justify-center md:justify-end gap-1.5 w-full text-xs font-semibold text-gray-500 dark:text-gray-400">
-                <Lock size={12} className="text-green-500" />
-                <span>Ingen spam. Avsluta när du vill.</span>
-              </div>
+
+              {status === 'error' && text.error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  role="alert"
+                  className="mt-3 text-sm text-red-600 font-medium bg-red-50 px-3 py-1 rounded-full border border-red-100"
+                >
+                  {text.error}
+                </motion.p>
+              )}
+
+              {text.note && (
+                <div className="mt-4 flex items-center justify-center md:justify-end gap-1.5 w-full text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  <Lock size={12} className="text-green-500" />
+                  <span>{text.note}</span>
+                </div>
+              )}
 
             </div>
 

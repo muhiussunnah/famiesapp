@@ -1,11 +1,11 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
   Home, Plus, Save, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Heading1, Type, ImageIcon,
-  Columns2, Minus, Megaphone, LayoutGrid, Pencil, X, Upload, ExternalLink, WandSparkles,
+  Columns2, Minus, Megaphone, LayoutGrid, Pencil, X, ExternalLink, WandSparkles,
   MonitorSmartphone, Code2,
 } from 'lucide-react';
 import 'react-quill-new/dist/quill.snow.css';
@@ -14,6 +14,8 @@ import {
 } from '@/components/admin/ui';
 import { useModal } from '@/components/admin/AdminModal';
 import HomepageBlocks from '@/components/HomepageBlocks';
+import ImageField from '@/components/admin/ImageField';
+import HomepageTextEditor from './HomepageTextEditor';
 import { cn } from '@/lib/utils';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -61,26 +63,6 @@ function defaultData(type) {
     default:
       return {};
   }
-}
-
-const HERO_KEYS = ['hero_eyebrow', 'hero_title', 'hero_subtitle'];
-const EMPTY_HERO = { hero_eyebrow: '', hero_title: '', hero_subtitle: '' };
-// What the homepage shows when a hero field is left empty (see src/components/Hero.js).
-const HERO_DEFAULTS = {
-  hero_eyebrow: 'Byggd av föräldrar, för föräldrar',
-  hero_title: 'Vill du veta vad familjer *nära dig* hittar på?',
-  hero_subtitle: 'Aktiviteter, event och skoj. Tillsammans. Delat av familjer i närheten.',
-};
-
-/** "*word*" → pink gradient, same rule as the public Hero. */
-function heroTitle(title) {
-  return title.split(/(\*[^*]+\*)/g).map((part, i) =>
-    part.startsWith('*') && part.endsWith('*') && part.length > 2 ? (
-      <span key={i} className="text-brand-gradient">{part.slice(1, -1)}</span>
-    ) : (
-      part
-    )
-  );
 }
 
 const QUILL_MODULES = {
@@ -333,7 +315,7 @@ export default function HomepageAdminPage() {
       <PageHeader
         icon={Home}
         title="Homepage"
-        description="Edit the hero text and build extra homepage sections from blocks. Blocks render on the homepage in the order shown below."
+        description="Edit every heading and text on the homepage, and build extra sections from blocks. Blocks appear between Features and the reviews, in the order shown below."
         actions={
           <>
             <Link
@@ -350,7 +332,7 @@ export default function HomepageAdminPage() {
         }
       />
 
-      <HeroEditor />
+      <HomepageTextEditor />
 
       <Card
         title="Content blocks"
@@ -557,115 +539,6 @@ export default function HomepageAdminPage() {
         </Dialog>
       )}
     </div>
-  );
-}
-
-/* ─── hero text ─────────────────────────────────────────────────────── */
-
-function HeroEditor() {
-  const [values, setValues] = useState(EMPTY_HERO);
-  const [original, setOriginal] = useState(EMPTY_HERO);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        // All settings (not ?group=hero): keys created by an upsert land in
-        // the default 'general' group.
-        const json = await api('/api/admin/site-settings');
-        const map = {};
-        for (const s of json.settings || []) map[s.key] = s.value ?? '';
-        const next = Object.fromEntries(HERO_KEYS.map((k) => [k, map[k] ?? '']));
-        if (!cancelled) {
-          setValues(next);
-          setOriginal(next);
-        }
-      } catch (e) {
-        if (!cancelled) toast.error(`Could not load hero text: ${e.message}`);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const dirty = HERO_KEYS.some((k) => values[k] !== original[k]);
-  const set = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
-
-  async function save() {
-    setSaving(true);
-    try {
-      await api('/api/admin/site-settings', {
-        method: 'PUT',
-        body: JSON.stringify({ updates: HERO_KEYS.map((key) => ({ key, value: values[key] })) }),
-      });
-      setOriginal(values);
-      toast.success('Hero text saved');
-    } catch (e) {
-      toast.error(`Save failed: ${e.message}`);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Card
-      title="Hero section"
-      description="The badge, headline (H1) and paragraph at the very top of the homepage."
-      actions={
-        <Button variant="accent" icon={Save} loading={saving} disabled={!dirty || loading} onClick={save}>
-          Save hero text
-        </Button>
-      }
-    >
-      {loading ? (
-        <LoadingBlock className="py-10" />
-      ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
-            <Field label="Eyebrow badge" hint="Small pill above the headline. Empty = the built-in text.">
-              <Input value={values.hero_eyebrow} onChange={set('hero_eyebrow')} placeholder={HERO_DEFAULTS.hero_eyebrow} />
-            </Field>
-            <Field label="Title (H1)" hint={`${values.hero_title.length} characters, ideally under 70. Wrap words in *stars* for the pink gradient. Empty = the built-in headline.`}>
-              <Textarea
-                rows={2}
-                value={values.hero_title}
-                onChange={set('hero_title')}
-                className="min-h-0 text-base font-semibold resize-y"
-                placeholder={HERO_DEFAULTS.hero_title}
-              />
-            </Field>
-            <Field label="Subtitle" hint={`${values.hero_subtitle.length} characters. One to three sentences works best. Empty = the built-in text.`}>
-              <Textarea rows={4} value={values.hero_subtitle} onChange={set('hero_subtitle')} className="min-h-0 resize-y" placeholder={HERO_DEFAULTS.hero_subtitle} />
-            </Field>
-          </div>
-
-          <div className="relative overflow-hidden rounded-2xl border border-ink-100 bg-brand-gradient-soft p-6 sm:p-8 flex flex-col justify-center min-h-[240px]">
-            <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -right-12 w-56 h-56 rounded-full bg-secondary/40 blur-3xl pointer-events-none" />
-            <p className="relative mb-4 text-[10px] font-bold uppercase tracking-wider text-ink-300">Preview</p>
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-full glass shadow-soft">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-ink-700">
-                  {values.hero_eyebrow.trim() || HERO_DEFAULTS.hero_eyebrow}
-                </span>
-              </div>
-              <p className="text-2xl sm:text-[2rem] font-black tracking-tight leading-[1.05] text-ink-900 mb-3 whitespace-pre-line">
-                {heroTitle(values.hero_title.trim() || HERO_DEFAULTS.hero_title)}
-              </p>
-              <p className="text-sm text-ink-500 leading-relaxed font-medium whitespace-pre-line">
-                {values.hero_subtitle.trim() || HERO_DEFAULTS.hero_subtitle}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </Card>
   );
 }
 
@@ -1025,52 +898,5 @@ function HtmlEditor({ value, onChange, compact = false }) {
         />
       )}
     </div>
-  );
-}
-
-/** URL input + upload (POST /api/admin/upload → { url }) + thumbnail. */
-function ImageField({ label, value, onChange, hint }) {
-  const fileRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
-
-  async function handleFile(e) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.url) throw new Error(json.error || `Upload failed (${res.status})`);
-      onChange(json.url);
-      toast.success('Image uploaded');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <Field label={label} hint={hint}>
-      <div className="flex gap-2">
-        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="https://… or /bild.webp" />
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-        <Button variant="secondary" icon={Upload} loading={uploading} onClick={() => fileRef.current?.click()}>
-          Upload
-        </Button>
-      </div>
-      {value && (
-        <div className="mt-2 flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="h-16 w-24 rounded-lg border border-ink-100 object-cover bg-ink-50" />
-          <button type="button" onClick={() => onChange('')} className="text-[12px] font-semibold text-red-500 hover:text-red-600">
-            Remove image
-          </button>
-        </div>
-      )}
-    </Field>
   );
 }

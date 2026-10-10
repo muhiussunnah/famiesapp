@@ -1,65 +1,59 @@
 'use client';
 import { motion } from 'framer-motion';
 import { Download, MapPin, Sparkles, ArrowRight } from 'lucide-react';
+import { formatText } from '@/components/FormattedText';
+import { HOMEPAGE_TEXT_DEFAULTS } from '@/lib/homepage-text';
 
-const steps = [
-  {
-    n: '01',
-    icon: Download,
-    title: 'Ladda ner appen',
-    body: 'Gratis på iOS och Android. Öppna, inget konto behövs för att börja titta.',
-    tint: 'pink',
-  },
-  {
-    n: '02',
-    icon: MapPin,
-    title: 'Berätta vilka ni är',
-    body: 'Barnens åldrar och var ni bor. Klart på 30 sekunder. Vi gör resten.',
-    tint: 'mint',
-  },
-  {
-    n: '03',
-    icon: Sparkles,
-    title: 'Få idéer varje dag',
-    body: 'Utvalt flöde med evenemang, tips och platser som faktiskt passar er familj. Nära dig.',
-    tint: 'pink',
-  },
-];
+// Numbers, icons and tints follow the step's position (texts come from the admin).
+const ICONS = [Download, MapPin, Sparkles];
 
-export default function HowItWorks() {
+export default function HowItWorks({ text = HOMEPAGE_TEXT_DEFAULTS.how }) {
+  const steps = text.steps.map((step, i) => ({
+    n: String(i + 1).padStart(2, '0'),
+    icon: ICONS[i % ICONS.length],
+    title: step.title,
+    body: step.body,
+    tint: i % 2 === 0 ? 'pink' : 'mint',
+  }));
+
   return (
     <section className="relative w-full py-20 md:py-28 section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16 md:mb-20 max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary"
-          >
-            Så enkelt är det
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6"
-          >
-            Från <span className="text-brand-gradient">"vad ska vi göra?"</span><br />
-            till "vi kör."
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium"
-          >
-            Tre steg. Ingen scroll-ångest. Inget konto innan du vill.
-          </motion.p>
+          {text.badge && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="inline-block px-4 py-1.5 mb-5 rounded-full glass shadow-soft text-xs font-bold uppercase tracking-wider text-primary"
+            >
+              {text.badge}
+            </motion.div>
+          )}
+          {text.title && (
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-6xl font-black text-ink-900 dark:text-white leading-[1.05] mb-6"
+            >
+              {formatText(text.title)}
+            </motion.h2>
+          )}
+          {text.subtitle && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl text-ink-500 dark:text-ink-300 font-medium"
+            >
+              {formatText(text.subtitle)}
+            </motion.p>
+          )}
         </div>
 
         {/* Steps, connected with dashed line on desktop */}
@@ -108,10 +102,10 @@ export default function HowItWorks() {
                     <Icon size={22} />
                   </div>
                   <h3 className="text-xl md:text-2xl font-extrabold text-ink-900 dark:text-white mb-3">
-                    {s.title}
+                    {formatText(s.title)}
                   </h3>
                   <p className="text-ink-500 dark:text-ink-300 leading-relaxed">
-                    {s.body}
+                    {formatText(s.body)}
                   </p>
                 </div>
               </motion.div>
